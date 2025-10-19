@@ -104,8 +104,8 @@ The SWF Cloud API provides two separate environments:
 ### Sandbox (UAT/Testing)
 Use this environment for integration testing and QA with test accounts and dummy data.
 
-- **Base URL:** `https://enterprise-qa.cleared.id/api/v1/merchant`
-- **Admin Portal:** `https://enterprise-qa.cleared.id/admin`
+- **Base URL:** `https://qa.cleared.id/api/v1/merchant`
+- **Admin Portal:** `https://qa.cleared.id/portal`
 - **Purpose:** Testing, development, and integration
 - **Data:** Test data only, no real personal information
 
@@ -113,7 +113,7 @@ Use this environment for integration testing and QA with test accounts and dummy
 Use this environment for live production data and real verifications.
 
 - **Base URL:** `https://cleared.id/api/v1/merchant`
-- **Admin Portal:** `https://cleared.id/admin`
+- **Admin Portal:** `https://cleared.id/portal`
 - **Purpose:** Live operations with real data
 - **Data:** Real personal and business information
 
@@ -196,7 +196,7 @@ After thorough testing in Sandbox, switch to the Production environment and begi
 
 ### Resources
 - [Cleared Website](https://cleared.id)
-- [API Portal](https://cleared.id/admin) (Admin access required)
+- [API Portal](https://cleared.id/portal) (Admin access required)
 - [API Changelog](./changelog.md) (Coming soon)
 - [SDK Libraries](./sdks.md) (Coming soon)
 
