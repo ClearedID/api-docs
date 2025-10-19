@@ -134,7 +134,7 @@ After your organisation is registered and approved, you can access the Admin Por
 
 **Sandbox Environment (Testing):**
 ```
-https://enterprise-qa.cleared.id/admin
+https://qa.cleared.id/portal
 ```
 Use this portal to:
 - Test your integration with dummy data
@@ -143,7 +143,7 @@ Use this portal to:
 
 **Production Environment (Live):**
 ```
-https://cleared.id/admin
+https://cleared.id/portal
 ```
 Use this portal to:
 - Manage live verifications

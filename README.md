@@ -174,14 +174,14 @@ Real-time notification system for verification events and system announcements.
 ## 🌍 Environments
 
 ### Sandbox (Testing)
-- **Base URL**: `https://enterprise-qa.swfcloud.com/api/v1/merchant`
-- **Admin Portal**: `https://enterprise-qa.swfcloud.com/admin`
+- **Base URL**: `https://cleared.id/api/v1/merchant`
+- **Admin Portal**: `https://qa.cleared.id/portal`
 - **Purpose**: Integration testing with test data
 - **Cost**: Free (unlimited testing)
 
 ### Production (Live)
-- **Base URL**: `https://swfcloud.com/api/v1/merchant`
-- **Admin Portal**: `https://swfcloud.com/admin`
+- **Base URL**: `https://cleared.id/api/v1/merchant`
+- **Admin Portal**: `https://cleared.id/portal`
 - **Purpose**: Live operations with real data
 - **Cost**: Credit-based pricing
 
@@ -192,13 +192,13 @@ Real-time notification system for verification events and system announcements.
 ### Authentication
 ```bash
 # Verify API key
-curl -X GET https://swfcloud.com/api/v1/merchant/auth/verify \
+curl -X GET https://cleared.id/api/v1/merchant/auth/verify \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### Initiate Identity Verification
 ```bash
-curl -X POST https://swfcloud.com/api/v1/merchant/identity/verification/initiate \
+curl -X POST https://cleared.id/api/v1/merchant/identity/verification/initiate \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -215,7 +215,7 @@ curl -X POST https://swfcloud.com/api/v1/merchant/identity/verification/initiate
 
 ### Create Verification Link
 ```bash
-curl -X POST https://swfcloud.com/api/v1/merchant/verification-links/create \
+curl -X POST https://cleared.id/api/v1/merchant/verification-links/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -227,7 +227,7 @@ curl -X POST https://swfcloud.com/api/v1/merchant/verification-links/create \
 
 ### Create Onboarding Page
 ```bash
-curl -X POST https://swfcloud.com/api/v1/merchant/screening/onboarding/pages/create \
+curl -X POST https://cleared.id/api/v1/merchant/screening/onboarding/pages/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "pageTitle=Loan Application" \
   -F "requiredVerifications=[\"identity\",\"address\",\"income\"]"
@@ -235,7 +235,7 @@ curl -X POST https://swfcloud.com/api/v1/merchant/screening/onboarding/pages/cre
 
 ### Sign Document
 ```bash
-curl -X POST https://swfcloud.com/api/v1/merchant/signatures/documents/create \
+curl -X POST https://cleared.id/api/v1/merchant/signatures/documents/create \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F "document=@contract.pdf" \
   -F "signers=[{\"name\":\"John Smith\",\"email\":\"john@example.com\"}]"
@@ -355,7 +355,7 @@ api-docs/
 
 ### Technical Support
 - **Email**: [support@cleared.id](mailto:support@cleared.id)
-- **Admin Portal**: [https://swfcloud.com/admin](https://swfcloud.com/admin)
+- **Admin Portal**: [https://cleared.id/admin](https://cleared.id/admin)
 - **Status Page**: [https://status.cleared.id](https://status.cleared.id)
 - **Website**: [https://cleared.id](https://cleared.id)
 
