@@ -258,7 +258,7 @@ For Verification Links API support:
 
 - **Technical Documentation**: [Verification Links Endpoints](./verification-links-endpoints.md)
 - **Email Support**: [support@cleared.id](mailto:support@cleared.id)
-- **Admin Portal**: [https://swfcloud.com/admin](https://swfcloud.com/admin)
+- **Admin Portal**: [https://cleared.id/admin](https://cleared.id/admin)
 
 ---
 
