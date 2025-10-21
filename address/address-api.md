@@ -214,7 +214,7 @@ When additional information is needed:
 
 ```json
 {
-  "companyId": "507f1f77bcf86cd799439040",
+  "companyId": "company_id",
   "companyName": "Acme Corporation Ltd",
   "documentAddress": {
     "addressLine1": "45 Business Plaza",
@@ -224,7 +224,7 @@ When additional information is needed:
   },
   "verifiedAddress": {...},
   "company": {
-    "_id": "507f1f77bcf86cd799439040",
+    "_id": "company_id",
     "name": "Acme Corporation Ltd",
     "registrationNumber": "12345678",
     "status": "verified"
@@ -263,7 +263,7 @@ For customers without full accounts:
   "userId": "catch-all-user-id",
   "meta": {
     "temporaryUserCode": "temp-abc123-def456",
-    "linkedIdentityVerificationId": "507f1f77bcf86cd799439011"
+    "linkedIdentityVerificationId": "identity_verification_id"
   }
 }
 ```
@@ -383,7 +383,7 @@ For Address Verification API support:
 
 - **Technical Documentation**: [Address API Endpoints](./address-endpoints.md)
 - **Email Support**: [support@cleared.id](mailto:support@cleared.id)
-- **Admin Portal**: [https://swfcloud.com/admin](https://swfcloud.com/admin)
+- **Admin Portal**: [https://cleared.id/admin](https://cleared.id/admin)
 
 ---
 

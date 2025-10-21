@@ -608,7 +608,7 @@ For Identity Verification API support:
 
 - **Technical Documentation**: [Identity API Endpoints](./identity-endpoints.md)
 - **Email Support**: [support@cleared.id](mailto:support@cleared.id)
-- **Admin Portal**: [https://swfcloud.com/admin](https://swfcloud.com/admin)
+- **Admin Portal**: [https://cleared.id/admin](https://cleared.id/admin)
 
 ---
 

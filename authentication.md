@@ -18,7 +18,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```bash
 curl -X GET https://cleared.id/api/v1/merchant/identity/verifications \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json"
 ```
 
@@ -83,7 +83,7 @@ To authenticate with the API, you must first obtain an API key from the Admin Po
 ### Steps to Generate an API Key
 
 1. **Log into the Admin Portal**
-   - Sandbox: [https://enterprise-qa.cleared.id/admin](https://enterprise-qa.cleared.id/admin)
+   - Sandbox: [https://qa.cleared.id/admin](https://qa.cleared.id/admin)
    - Production: [https://cleared.id/admin](https://cleared.id/admin)
 
 2. **Navigate to API Integrations**
@@ -129,8 +129,8 @@ The API key is a JWT (JSON Web Token) that contains:
 **Example JWT payload (decoded):**
 ```json
 {
-  "organisationId": "507f1f77bcf86cd799439011",
-  "clientId": "507f1f77bcf86cd799439012",
+  "organisationId": "org_123456789",
+  "clientId": "client_123456789",
   "permissions": ["identity:read", "identity:write", "address:read"],
   "environment": "production",
   "iat": 1634567890,
@@ -201,7 +201,7 @@ API keys must **only** be used in secure, server-side environments.
 ❌ **DON'T DO THIS:**
 ```javascript
 // Never put API keys in frontend JavaScript
-const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+const apiKey = 'YOUR_API_KEY';
 fetch('/api/endpoint', {
   headers: { 'Authorization': `Bearer ${apiKey}` }
 });
@@ -222,7 +222,7 @@ Use encrypted secrets storage, environment variables, or a key management system
 **Environment Variables:**
 ```bash
 # .env file (never commit to version control)
-SWF_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SWF_API_KEY=YOUR_API_KEY
 ```
 
 **AWS Secrets Manager:**
@@ -390,7 +390,7 @@ curl -X GET https://cleared.id/api/v1/merchant/auth/verify \
   "success": true,
   "data": {
     "authenticated": true,
-    "organisationId": "507f1f77bcf86cd799439011",
+    "organisationId": "org_123456789",
     "organisationName": "Acme Corporation",
     "environment": "production",
     "permissions": ["identity:read", "identity:write", "address:read"],

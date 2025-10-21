@@ -16,12 +16,12 @@ Used for integration testing and QA with test accounts and dummy data.
 
 **Base URL:**
 ```
-https://enterprise-qa.cleared.id/api/v1/merchant
+https://qa.cleared.id/api/v1/merchant
 ```
 
 **Admin Portal:**
 ```
-https://enterprise-qa.cleared.id/admin
+https://qa.cleared.id/admin
 ```
 
 **Characteristics:**
@@ -33,7 +33,7 @@ https://enterprise-qa.cleared.id/admin
 
 **Example Request:**
 ```bash
-curl -X GET https://enterprise-qa.cleared.id/api/v1/merchant/identity/results \
+curl -X GET https://qa.cleared.id/api/v1/merchant/identity/results \
   -H "Authorization: Bearer YOUR_SANDBOX_API_KEY" \
   -H "Content-Type: application/json"
 ```
@@ -272,7 +272,7 @@ Retrieve a specific resource by its unique identifier.
 
 **Example:**
 ```bash
-GET /api/v1/merchant/identity/verifications/507f1f77bcf86cd799439011
+GET /api/v1/merchant/identity/verifications/verification_id
 ```
 
 **Response:**
@@ -280,7 +280,7 @@ GET /api/v1/merchant/identity/verifications/507f1f77bcf86cd799439011
 {
   "success": true,
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
+    "_id": "verification_id",
     "status": "completed",
     "result": {...}
   }
@@ -313,7 +313,7 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
+    "_id": "verification_id",
     "status": "pending",
     "verificationUrl": "https://verify.cleared.id/v/abc123"
   },
@@ -331,7 +331,7 @@ Update an existing resource.
 
 **Example:**
 ```bash
-PATCH /api/v1/merchant/identity/verifications/507f1f77bcf86cd799439011
+PATCH /api/v1/merchant/identity/verifications/verification_id
 Content-Type: application/json
 
 {
@@ -344,7 +344,7 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
+    "_id": "verification_id",
     "status": "cancelled"
   },
   "message": "Verification updated successfully"
@@ -361,7 +361,7 @@ Delete a resource (soft delete in most cases).
 
 **Example:**
 ```bash
-DELETE /api/v1/merchant/identity/verifications/507f1f77bcf86cd799439011
+DELETE /api/v1/merchant/identity/verifications/verification_id
 ```
 
 **Response:**
@@ -555,7 +555,7 @@ Configure webhooks to receive real-time notifications about verification events:
   "event": "verification.completed",
   "timestamp": "2025-10-19T12:00:00Z",
   "data": {
-    "verificationId": "507f1f77bcf86cd799439011",
+    "verificationId": "verification_id",
     "status": "verified",
     "result": {...}
   },

@@ -1,8 +1,8 @@
-# Cleared™ API Documentation
+# Cleared® API Documentation
 
 ## Overview
 
-Cleared™ is a **digital verification and signature platform** that provides trusted solutions for businesses, consumers, and organisations.
+Cleared® is a **digital verification and signature platform** that provides trusted solutions for businesses, consumers, and organisations.
 
 Our services include **identity, address, income, employment, qualification, background, and company verification**, as well as **digital document signing**, **onboarding workflows**, and **compliance management**.
 
@@ -520,4 +520,4 @@ By using the Cleared API, you agree to:
 
 *Last updated: October 19, 2025*  
 *Version: 2.0*  
-*© 2025 Cleared™. All rights reserved.*
+*© 2025 Cleared®. All rights reserved.*
