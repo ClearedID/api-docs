@@ -330,7 +330,7 @@ You can invite team members to access the Admin Portal.
 To switch environments:
 
 1. **Different Base URLs**
-   - Sandbox: `https://enterprise-qa.cleared.id/api/v1/merchant`
+   - Sandbox: `https://qa.cleared.id/api/v1/merchant`
    - Production: `https://cleared.id/api/v1/merchant`
 
 2. **Different API Keys**

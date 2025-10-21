@@ -2,13 +2,13 @@
 
 ## Welcome to the SWF Cloud API
 
-Welcome to the **Cleared API**, a secure and modern REST API that enables your platform to seamlessly integrate screening and verification services provided by **Cleared™**.
+Welcome to the **Cleared API**, a secure and modern REST API that enables your platform to seamlessly integrate screening and verification services provided by **Cleared®**.
 
 Our API is built for scale, security, and flexibility, and allows you to perform checks, request verifications, retrieve results, and manage interactions with your verified subjects from your own platform.
 
-## About Cleared™
+## About Cleared®
 
-Cleared™ is a **digital signature and verification platform** that provides trusted solutions for businesses, consumers, and organisations. Our services include:
+Cleared® is a **digital signature and verification platform** that provides trusted solutions for businesses, consumers, and organisations. Our services include:
 
 - **Identity Verification** – AI-powered ID checks with biometric matching
 - **Address Verification** – Validate residential and business addresses

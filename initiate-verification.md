@@ -154,8 +154,8 @@ Create a verification request for a customer.
 {
   "message": "Verification requests initiated successfully",
   "success": true,
-  "resultId": "507f1f77bcf86cd799439070",
-  "requestId": "507f1f77bcf86cd799439013",
+  "resultId": "result_id",
+  "requestId": "request_id",
   "token": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
@@ -400,8 +400,8 @@ const request = {
 ```json
 {
   "success": true,
-  "requestId": "507f1f77bcf86cd799439013",
-  "resultId": "507f1f77bcf86cd799439070",
+  "requestId": "request_id",
+  "resultId": "result_id",
   "token": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```

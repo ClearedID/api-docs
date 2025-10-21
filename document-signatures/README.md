@@ -7,7 +7,7 @@ The Document Signatures API provides a comprehensive solution for creating, mana
 ## Base URL
 
 ```
-https://api.cleared.id/api/v1
+https://cleared.id/api/v1
 ```
 
 ## Authentication
@@ -225,10 +225,10 @@ Webhook payload example:
   "event": "document.completed",
   "timestamp": "2025-10-19T12:00:00Z",
   "data": {
-    "documentId": "507f1f77bcf86cd799439011",
+    "documentId": "doc_123456789",
     "title": "Employment Contract",
     "status": "completed",
-    "organisationId": "507f1f77bcf86cd799439012"
+    "organisationId": "org_123456789"
   }
 }
 ```
