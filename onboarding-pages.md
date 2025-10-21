@@ -445,14 +445,14 @@ Retrieve all logos uploaded by the organisation for reuse.
       "name": "company-logo",
       "url": "https://cleared-public.s3.us-east-1.amazonaws.com/onboarding-logos/1634567890_company-logo.png",
       "clientName": "Acme Financial Services",
-      "fileKey": "onboarding-logos/1634567890_company-logo.png"
+      "fileKey": "onboarding-logos/company-logo.png"
     },
     {
       "_id": "onboarding-logos/1634567891_alternate-logo.png",
       "name": "alternate-logo",
       "url": "https://cleared-public.s3.us-east-1.amazonaws.com/onboarding-logos/1634567891_alternate-logo.png",
       "clientName": "Acme Financial Services",
-      "fileKey": "onboarding-logos/1634567891_alternate-logo.png"
+      "fileKey": "onboarding-logos/alternate-logo.png"
     }
   ]
 }
