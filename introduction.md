@@ -1,6 +1,6 @@
 # Introduction
 
-## Welcome to the SWF Cloud API
+## Welcome to the Cleared® API
 
 Welcome to the **Cleared API**, a secure and modern REST API that enables your platform to seamlessly integrate screening and verification services provided by **Cleared®**.
 
@@ -50,7 +50,7 @@ This API documentation provides full, production-ready detail on:
 
 ## API Architecture
 
-The SWF Cloud API follows RESTful principles and uses standard HTTP methods:
+The Cleared® API follows RESTful principles and uses standard HTTP methods:
 
 - **GET** – Retrieve resources or data
 - **POST** – Create new resources or initiate actions
@@ -99,7 +99,7 @@ The API uses standard HTTP status codes:
 
 ## Environments
 
-The SWF Cloud API provides two separate environments:
+The Cleared® API provides two separate environments:
 
 ### Sandbox (UAT/Testing)
 Use this environment for integration testing and QA with test accounts and dummy data.
@@ -147,7 +147,7 @@ We maintain backward compatibility within major versions. When breaking changes 
 
 ## Security
 
-The SWF Cloud API implements multiple layers of security:
+The Cleared® API implements multiple layers of security:
 
 - **TLS/HTTPS:** All API communication uses TLS 1.2 or higher
 - **API Key Authentication:** Bearer token authentication for all requests
@@ -207,7 +207,7 @@ After thorough testing in Sandbox, switch to the Production environment and begi
 
 ## Terms and Compliance
 
-By using the SWF Cloud API, you agree to:
+By using the Cleared® API, you agree to:
 
 - Comply with all applicable data protection regulations (GDPR, CCPA, etc.)
 - Use the API only for legitimate business purposes

@@ -12,46 +12,37 @@ https://cleared.id/api/v1
 
 ## Authentication
 
-All merchant endpoints require authentication via JWT token. Include the token in the request headers:
+All endpoints require authentication via JWT token. Include the token in the request headers:
 
 ```
 Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 ```
 
-Public endpoints (signing flow) use document-specific signing tokens that are generated when a document is sent to signers.
-
 ## API Categories
 
-### 1. Public Signature Documents API
-Endpoints used by signers to view and sign documents they've been invited to sign.
-
-- **Documentation**: [Public Signature Documents API](./public-signature-documents.md)
-- **Base Path**: `/api/v1/public/signatures/documents`
-- **Authentication**: Signing token (provided in signing URL)
-
-### 2. Merchant Signature Documents API
+### 1. Merchant Signature Documents API
 Endpoints for merchants to create, manage, and send documents for signature.
 
 - **Documentation**: [Merchant Signature Documents API](./merchant-signature-documents.md)
 - **Base Path**: `/api/v1/merchant/signatures/documents`
 - **Authentication**: Merchant JWT token
 
-### 3. Envelopes API
+### 2. Envelopes API
 Endpoints for managing document envelopes (collections of related documents).
 
 - **Documentation**: [Envelopes API](./envelopes.md)
 - **Base Path**: `/api/v1/merchant/signatures/envelopes`
 - **Authentication**: Merchant JWT token
 
-### 4. Document Templates API
+### 3. Document Templates API
 Endpoints for creating and managing reusable document templates.
 
 - **Documentation**: [Document Templates API](./document-templates.md)
 - **Base Path**: `/api/v1/merchant/signatures/templates`
 - **Authentication**: Merchant JWT token
 
-### 5. Envelope Templates API
+### 4. Envelope Templates API
 Endpoints for creating and managing reusable envelope templates.
 
 - **Documentation**: [Envelope Templates API](./envelope-templates.md)
@@ -80,18 +71,17 @@ Templates are reusable document configurations that include:
 - Configuration settings
 - When instantiated, roles are mapped to actual signers
 
-### Signing Workflow
+### Document Workflow
 
 1. **Merchant creates document** → Status: `draft`
 2. **Merchant uploads PDF and configures fields**
-3. **Merchant sends document** → Status: `enqueued`
-4. **Signer receives email with signing link**
-5. **Signer views document** (with signing token)
-6. **(Optional) Identity verification** if required
-7. **Signer fills and signs fields** → Status: `signed` for that signer
-8. **All signers complete** → Status: `ready_for_digital_signature`
-9. **Digital signature applied by CLEARED IDENTITY LIMITED** → Status: `completed`
-10. **Final signed PDF available for download**
+3. **Merchant adds signers and sends document** → Status: `enqueued`
+4. **Signers receive email with signing link**
+5. **(Optional) Identity verification** if required
+6. **Signers complete their signatures** → Status: `signed` for each signer
+7. **All signers complete** → Status: `ready_for_digital_signature`
+8. **Digital signature applied by CLEARED IDENTITY LIMITED** → Status: `completed`
+9. **Merchant downloads final signed PDF**
 
 ### Digital Signature Implementation
 
@@ -156,8 +146,7 @@ The system uses a two-phase signing approach:
 ## Rate Limiting
 
 API requests are rate limited to:
-- **Merchant endpoints**: 1000 requests per hour per organization
-- **Public endpoints**: 100 requests per hour per IP address
+- **Merchant endpoints**: 1000 requests per hour per organisation
 
 Rate limit information is included in response headers:
 ```
@@ -237,7 +226,6 @@ Webhook payload example:
 
 1. **Token Management**
    - JWT tokens expire after 24 hours
-   - Signing tokens are document-specific and single-use
    - Store tokens securely, never expose in client-side code
 
 2. **Identity Verification**

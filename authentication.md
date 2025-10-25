@@ -2,7 +2,7 @@
 
 ## Overview
 
-All requests to the SWF Cloud API must be authenticated using a secure API key, provided in the `Authorization` header using the **Bearer token format**. The API key is a loaded JWT token that contains your organisation's credentials and permissions.
+All requests to the Cleared® API must be authenticated using a secure API key, provided in the `Authorization` header using the **Bearer token format**. The API key is a loaded JWT token that contains your organisation's credentials and permissions.
 
 This page explains how to obtain your API key, how to authenticate requests properly, and the security expectations for systems integrating with our cloud.
 
@@ -27,7 +27,7 @@ curl -X GET https://cleared.id/api/v1/merchant/identity/verifications \
 ```javascript
 const axios = require('axios');
 
-const apiKey = process.env.SWF_API_KEY;
+const apiKey = process.env.CLEARED_API_KEY;
 
 const response = await axios.get('https://cleared.id/api/v1/merchant/identity/verifications', {
   headers: {
@@ -43,7 +43,7 @@ const response = await axios.get('https://cleared.id/api/v1/merchant/identity/ve
 import requests
 import os
 
-api_key = os.environ.get('SWF_API_KEY')
+api_key = os.environ.get('CLEARED_API_KEY')
 
 headers = {
     'Authorization': f'Bearer {api_key}',
@@ -61,7 +61,7 @@ response = requests.get(
 ```php
 <?php
 
-$apiKey = getenv('SWF_API_KEY');
+$apiKey = getenv('CLEARED_API_KEY');
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://cleared.id/api/v1/merchant/identity/verifications');
@@ -222,7 +222,7 @@ Use encrypted secrets storage, environment variables, or a key management system
 **Environment Variables:**
 ```bash
 # .env file (never commit to version control)
-SWF_API_KEY=YOUR_API_KEY
+CLEARED_API_KEY=YOUR_API_KEY
 ```
 
 **AWS Secrets Manager:**
@@ -433,7 +433,7 @@ curl -X GET https://cleared.id/api/v1/merchant/auth/verify \
 **Issue: "CORS errors in browser"**
 - API keys should never be used from frontend/browser code
 - Move authentication to your backend server
-- Use your backend as a proxy to the SWF API
+- Use your backend as a proxy to the Cleared API
 
 ## Next Steps
 

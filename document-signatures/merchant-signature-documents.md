@@ -1318,8 +1318,8 @@ await fetch(`/api/v1/merchant/signatures/documents/${document._id}/send`, {
 
 ## Related Documentation
 
-- [Public Signature Documents API](./public-signature-documents.md)
 - [Envelopes API](./envelopes.md)
 - [Document Templates API](./document-templates.md)
+- [Envelope Templates API](./envelope-templates.md)
 - [API Overview](./README.md)
 
