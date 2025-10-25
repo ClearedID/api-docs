@@ -345,7 +345,7 @@ To switch environments:
 
 ### Credit System
 
-The SWF Cloud API uses a credit-based system:
+The Cleared® API uses a credit-based system:
 
 - Each verification type costs a specific number of credits
 - Credits are deducted upon verification initiation

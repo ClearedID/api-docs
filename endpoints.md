@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cleared uses a powerful, secure REST API under the SWF Cloud infrastructure, enabling clients to initiate and manage verification requests across multiple services such as identity, address, income, employment, background checks, and company verifications.
+Cleared uses a powerful, secure REST API infrastructure, enabling clients to initiate and manage verification requests across multiple services such as identity, address, income, employment, background checks, and company verifications.
 
 This page explains the base URLs, how to make API calls, and general guidelines for using the `/api/v1/merchant` endpoints.
 
@@ -68,7 +68,7 @@ curl -X GET https://cleared.id/api/v1/merchant/identity/results \
 
 ## API Services
 
-The SWF Cloud API provides the following verification and screening services:
+The Cleared® API provides the following verification and screening services:
 
 ### Identity Verification
 
@@ -83,7 +83,7 @@ Verify identities using government-issued ID documents and biometric matching.
 - Age verification
 - Document authenticity checks
 
-**Documentation:** [Identity Verification API](./services/identity-verification.md)
+**Documentation:** [Identity Verification API](./identity/identity-api.md)
 
 ---
 
@@ -100,7 +100,7 @@ Validate residential and business addresses against official records.
 - Occupancy verification
 - Historical address searches
 
-**Documentation:** [Address Verification API](./merchant/address-verification.md)
+**Documentation:** [Address Verification API](./address/address-api.md)
 
 ---
 
@@ -117,7 +117,7 @@ Verify income and salary information for individuals.
 - Employment income validation
 - Income trend analysis
 
-**Documentation:** [Income Verification API](./merchant/income-verification.md)
+**Documentation:** [Income Verification API](./income/introduction.md)
 
 ---
 
@@ -134,7 +134,7 @@ Confirm employment history and current employment status.
 - Employer reference checks
 - Employment gap analysis
 
-**Documentation:** [Employment Verification API](./merchant/employment-verification.md)
+**Documentation:** Employment Verification API (Coming soon)
 
 ---
 
@@ -151,7 +151,7 @@ Verify academic and professional qualifications.
 - Institution verification
 - Transcript validation
 
-**Documentation:** [Qualifications Verification API](./merchant/qualifications-verification.md)
+**Documentation:** Qualifications Verification API (Coming soon)
 
 ---
 
@@ -168,7 +168,7 @@ Verify personal and professional references.
 - Professional reference validation
 - Reference response tracking
 
-**Documentation:** [Reference Verification API](./merchant/reference-verification.md)
+**Documentation:** [Reference Verification API](./references/introduction.md)
 
 ---
 
@@ -185,7 +185,7 @@ Comprehensive background screening and criminal record checks.
 - Sanctions and PEP screening
 - Media and adverse news checks
 
-**Documentation:** [Background Checks API](./merchant/background-checks.md)
+**Documentation:** [Background Checks API](./criminal-records/introduction.md)
 
 ---
 
@@ -202,7 +202,7 @@ Verify corporate entities and business information.
 - TRN/Tax ID validation
 - Corporate structure verification
 
-**Documentation:** [Company Verification API](./merchant/company-verification.md)
+**Documentation:** Company Verification API (Coming soon)
 
 ---
 
@@ -219,7 +219,7 @@ Secure document signing with digital certificates.
 - Template management
 - Audit trail and compliance
 
-**Documentation:** [Digital Signatures API](./merchant/digital-signatures.md)
+**Documentation:** [Digital Signatures API](./document-signatures/README.md)
 
 ---
 
@@ -563,7 +563,7 @@ Configure webhooks to receive real-time notifications about verification events:
 }
 ```
 
-**Documentation:** [Webhooks Guide](./webhooks.md)
+**Documentation:** Webhooks Guide (Coming soon)
 
 ## Rate Limiting
 
@@ -662,7 +662,7 @@ curl -X POST https://cleared.id/api/v1/merchant/identity/verifications \
 
 ### Using Postman
 
-1. Import the [SWF Cloud API Postman Collection](./postman-collection.json)
+1. Import the [Cleared® API Postman Collection](./postman-collection.json)
 2. Set environment variables:
    - `api_key` – Your API key
    - `base_url` – Environment base URL
@@ -680,15 +680,15 @@ Now that you understand the endpoints structure:
 
 ## Available Service APIs
 
-- [Identity Verification API](./merchant/identity-verification.md)
-- [Address Verification API](./merchant/address-verification.md)
-- [Income Verification API](./merchant/income-verification.md)
-- [Employment Verification API](./merchant/employment-verification.md)
-- [Background Checks API](./merchant/background-checks.md)
-- [Company Verification API](./merchant/company-verification.md)
-- [Digital Signatures API](./merchant/digital-signatures.md)
+- [Identity Verification API](./identity/identity-api.md)
+- [Address Verification API](./address/address-api.md)
+- [Income Verification API](./income/introduction.md)
+- [Reference Verification API](./references/introduction.md)
+- [Background Checks API](./criminal-records/introduction.md)
+- [Digital Signatures API](./document-signatures/README.md)
+- [Verification Links API](./verification-links/verification-links-api.md)
 
 ---
 
-← [Registration](./registration.md) | [Service APIs](./merchant/) →
+← [Registration](./registration.md) | [API Documentation](./README.md) →
 
