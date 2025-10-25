@@ -129,13 +129,12 @@ Secure document signing with legal validity and tamper-proof sealing.
 | Document | Description |
 |----------|-------------|
 | **[Signatures Overview](./document-signatures/README.md)** | Introduction to digital signature services |
-| **[Public Documents](./document-signatures/public-signature-documents.md)** | 8 endpoints for signer access and document signing |
 | **[Merchant Documents](./document-signatures/merchant-signature-documents.md)** | 24 endpoints for document management and tracking |
 | **[Envelopes](./document-signatures/envelopes.md)** | 16 endpoints for multi-document signing packages |
 | **[Document Templates](./document-signatures/document-templates.md)** | 9 endpoints for reusable document templates |
 | **[Envelope Templates](./document-signatures/envelope-templates.md)** | 7 endpoints for reusable envelope packages |
 
-**Total Endpoints**: 65+ endpoints
+**Total Endpoints**: 56 endpoints
 
 **Key Features**: PDF signing, certificate-based signatures, multi-signer workflows, template system, audit trails
 
@@ -254,11 +253,11 @@ curl -X POST https://cleared.id/api/v1/merchant/signatures/documents/create \
 | **Address Verification** | 2 files | 13 endpoints | Address validation, GPS checks |
 | **Verification Requests** | 2 files | 5 endpoints | Create and manage requests |
 | **Verification Links** | 2 files | 7 endpoints | Shareable verification URLs |
-| **Digital Signatures** | 6 files | 65+ endpoints | Document and envelope signing |
+| **Digital Signatures** | 5 files | 56 endpoints | Document and envelope signing |
 | **Onboarding Pages** | 1 file | 12 endpoints | Custom onboarding workflows |
 | **Merchant Updates** | 1 file | 6 endpoints | Real-time notifications |
 
-**Total**: 24 files, 159+ endpoints documented
+**Total**: 23 files, 151 endpoints documented
 
 ---
 
@@ -291,7 +290,6 @@ api-docs/
 │
 ├── document-signatures/
 │   ├── README.md                         # Signatures overview
-│   ├── public-signature-documents.md     # Public endpoints (8)
 │   ├── merchant-signature-documents.md   # Merchant endpoints (24)
 │   ├── envelopes.md                      # Envelopes (16)
 │   ├── document-templates.md             # Doc templates (9)
