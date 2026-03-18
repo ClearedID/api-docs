@@ -341,6 +341,9 @@ api-docs/
 3. Receive clearance notification
 4. Store verification results for compliance
 
+### Use Case 6: ABC Company LLC Loan Application Workflow
+Follow this end-to-end workflow for ABC Company LLC onboarding (IDV via onboarding pages + redirect) and contract signing (document templates, eSeal, and outbound webhooks): [ABC Company LLC – Cleared Workflow Documentation](./client-loan-application-workflow.md)
+
 ---
 
 ## 🛠️ Developer Support
