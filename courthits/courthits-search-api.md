@@ -2,62 +2,20 @@
 
 Reference for **search**, **pagination**, **result sets**, **hit detail**, and **screening** (adverse media / sanctions) **without** separate billing or admin endpoints.
 
-**Base path (after gateway):** `/api/v1/services/courthits`
+**CourtHits API base path:** `/api/v1/services/courthits` (relative to your API host; exact routing depends on how you expose the CourtHits service).
 
 ---
 
 ## Conventions
 
 - **JSON** bodies and responses unless noted.
-- **Page size:** member court search returns up to **5** hits per request (`items`); `totalHits` is the full match count.
+- **Page size:** court search returns up to **5** hits per request (`items`); `totalHits` is the full match count.
 - **`resultSetId`:** opaque **JWT** (or legacy UUID) tying hits to a **credited** search session. Pass it on **pagination**, **detail**, and **hydration** as documented.
 - **`cursor`:** opaque **base64** string; encodes the next `skip` offset for the same query core. Omit on first page.
 
 ---
 
-## Guest — court search
-
-### `POST /guest/search`
-
-**Purpose:** Public-style court search with redacted teasers; subject to guest quota and rate limits.
-
-**Headers:** `cleared-device-id` (and any other headers required by your gateway for guest Courthits).
-
-**Body (JSON):**
-
-| Field | Type | Required | Notes |
-|-------|------|----------|--------|
-| `q` | string | Yes | Non-empty search text |
-| `country` | string | No | Default `JM` |
-| `courtDivisions` | string[] | No | Filter by division |
-| `dateBucket` | string | No | `this_year` \| `last_year` \| `older` |
-| `recordTypes` | string[] | No | Allow-listed record type strings |
-| `cursor` | string | No | From previous `nextCursor` |
-
-**Response (success):** `mode`, `totalHits`, `items` (redacted), `nextCursor`, `guestQuota`, etc.
-
-**Errors:** `400` validation, `429` quota / rate limit.
-
----
-
-### `GET /guest/record/:id`
-
-**Purpose:** Fetch a single guest-safe hit teaser by Mongo id.
-
-**Response:** `{ mode: "guest", item: { ... } }` (redacted fields per product rules).
-
----
-
-### Meta (optional for clients)
-
-- `GET /guest/meta/quota` — quota + index stats (with device id).
-- `GET /guest/meta/stats` — index size (no device id).
-- `GET /guest/meta/pricing` — search/detail **credit costs** (numbers for UI only).
-- `GET /guest/meta/divisions?country=JM` — court divisions list.
-
----
-
-## Member — court search
+## Court search (member)
 
 ### `POST /search`
 
@@ -72,7 +30,7 @@ Reference for **search**, **pagination**, **result sets**, **hit detail**, and *
 | `q` | string | Yes | Non-empty |
 | `country` | string | No | Default `JM` |
 | `courtDivisions` | string[] | No | Refinement on same query core |
-| `dateBucket` | string | No | Same as guest |
+| `dateBucket` | string | No | `this_year` \| `last_year` \| `older` |
 | `recordTypes` | string[] | No | Allow-listed |
 | `cursor` | string | No | Pagination |
 | `resultSetId` | string | No | From prior response — **pagination** or **filter refinement** or **first-page hydration** |
@@ -121,9 +79,9 @@ Reference for **search**, **pagination**, **result sets**, **hit detail**, and *
 
 ---
 
-## Member — adverse media & sanctions
+## Adverse media & sanctions (member)
 
-Paths are under the same Courthits service prefix.
+Paths are under the same CourtHits service prefix.
 
 ### `POST /screening/media-search`
 
@@ -151,12 +109,6 @@ Paths are under the same Courthits service prefix.
 
 ---
 
-## Guest screening (optional)
-
-Guest variants exist under `/guest/screening/...` with redacted responses; use when your product enables guest screening flows.
-
----
-
 ## Error shape
 
 Typical error JSON:
@@ -173,7 +125,7 @@ Typical error JSON:
 
 ## Integration checklist
 
-1. Call **`POST /search`** (or guest search) with a non-empty `q`.
+1. Call **`POST /search`** with a non-empty `q` and valid member authentication.
 2. Store **`resultSetId`** and use **`nextCursor`** until exhausted.
 3. For hit UI, call **`GET /record/:id?resultSetId=...`**.
 4. For parallel / saved flows, use **`resultSetId`** on the **first** member search page to **hydrate** without re-querying Mongo when fingerprint matches.
@@ -181,4 +133,4 @@ Typical error JSON:
 
 ---
 
-*For behaviour tied to credit amounts and feature flags, see runtime **meta** endpoints and your Cleared environment configuration — not duplicated here.*
+*For behaviour tied to credit amounts and feature flags, see your **CourtHits API** deployment configuration and any runtime meta endpoints your gateway exposes — not duplicated here.*

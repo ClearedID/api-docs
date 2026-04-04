@@ -122,14 +122,14 @@ Create shareable verification links for customer self-service verification.
 
 ### CourtHits — court records & screening
 
-**CourtHits** is Cleared’s **public court record search** surface: guest and member search, hit detail, and optional **adverse media** / **sanctions & PEP** screening via the same gateway patterns as other Cleared services.
+**CourtHits** is a **court record search** product exposed as the **CourtHits API**: organisation-authenticated search, hit detail, and optional **adverse media** / **sanctions & PEP** screening. Integrations use the same service prefix documented below.
 
 | Document | Description |
 |----------|-------------|
 | **[CourtHits API overview](./courthits/README.md)** | Audience, base URL, authentication, and index of CourtHits docs |
-| **[Search & results API](./courthits/courthits-search-api.md)** | Guest/member search, pagination, hydration, record detail, screening |
+| **[Search & results API](./courthits/courthits-search-api.md)** | Search, pagination, hydration, record detail, screening |
 
-**Base path (after your gateway host):** `/api/v1/services/courthits`
+**CourtHits API base path:** `/api/v1/services/courthits`
 
 ---
 
