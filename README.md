@@ -122,12 +122,12 @@ Create shareable verification links for customer self-service verification.
 
 ### CourtHits — court records & screening
 
-**CourtHits** is a **court record search** product exposed as the **CourtHits API**: organisation-authenticated search, hit detail, and optional **adverse media** / **sanctions & PEP** screening. Integrations use the same service prefix documented below.
+**CourtHits** is exposed as the **CourtHits API**: organisation-authenticated **court record** search (detail, related hits, disputes), **company registry** search and profiles, **adverse media**, **sanctions & PEP** screening, **cached snapshot reload**, and **saved screening queries**.
 
 | Document | Description |
 |----------|-------------|
 | **[CourtHits API overview](./courthits/README.md)** | Audience, base URL, authentication, and index of CourtHits docs |
-| **[Search & results API](./courthits/courthits-search-api.md)** | Search, pagination, hydration, record detail, screening |
+| **[CourtHits API reference & examples](./courthits/courthits-search-api.md)** | Endpoints with request/response examples (cURL + JSON) |
 
 **CourtHits API base path:** `/api/v1/services/courthits`
 

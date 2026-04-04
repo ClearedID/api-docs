@@ -8,11 +8,10 @@ This folder documents **search and result-retrieval flows only** (no billing adm
 
 Integrators who want to:
 
-- Run **organisation-scoped** court searches from a backend service.
-- Page results with **`resultSetId`** and **`cursor`**.
-- **Hydrate** the first page from a saved result set (same fingerprint) without re-running the search.
-- Open **full hit detail** and **related hits** in a credited, auditable way.
-- Run **adverse media** / **sanctions** screening and **reload cached snapshots** via token.
+- Run **organisation-scoped** **court** search and open **hit detail**, **related hits**, and **disputes**.
+- Search **company registries** (JM / UK / US) and load **UK/US company profiles** by registration number.
+- Run **adverse media** and **sanctions & PEP** name screening, then **reload cached snapshots** without a second charge.
+- Store **saved screening queries** for company / media / sanctions flows.
 
 ## Base URL
 
@@ -39,7 +38,7 @@ POST https://<host>/api/v1/services/courthits/search
 
 | Document | Description |
 |----------|-------------|
-| **[CourtHits search & results](./courthits-search-api.md)** | Search, `resultSetId`, cursors, record detail, screening search & snapshot |
+| **[CourtHits API reference & examples](./courthits-search-api.md)** | Court records, disputes, company registry & profile, adverse media, sanctions, snapshots, saved queries, `GET /health` |
 
 ## Related products
 
