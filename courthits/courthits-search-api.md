@@ -126,7 +126,7 @@ curl -sS -G "$BASE/record/507f1f77bcf86cd799439011" \
 }
 ```
 
-May **debit** a detail credit per organisation + record (idempotent).
+May **debit** a detail credit per organisation + record when the last such debit for that hit is older than **`COURTHITS_HIT_PAID_ACCESS_TTL_DAYS`** (default 30 days); repeat views inside the window are free.
 
 ---
 
