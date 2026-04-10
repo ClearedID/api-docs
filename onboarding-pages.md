@@ -63,6 +63,34 @@ An onboarding page consists of:
 7. Customer redirected to destination URL
 ```
 
+### Public onboarding URL parameters (prefill & guest authentication)
+
+Customers often open an onboarding page from a link your system generates. You may append **query parameters** to prefill profile data, prefill lead capture fields, and (for link/embed entry) **start the guest sign-in flow** without typing their email first.
+
+**Example (illustrative):**
+
+```text
+https://cleared.id/pages/your-page-id?emailAddress=andremartin@gmail.com&firstName=Andre&lastName=Martin&phoneNumber=87600000044
+```
+
+#### Authentication: `emailAddress` and OTP
+
+- If the page is in **link or embed** entry mode and **`emailAddress`** is present with a **valid email** format, the onboarding app **automatically calls** the public auth **`/start`** endpoint with that address (and optional profile prefill below) so a **one-time password (OTP)** is sent to the email.
+- The user **still completes OTP verification** on the verification step—they are not silently logged in without proving control of the inbox (unless the backend returns an already-active session, e.g. existing valid session).
+- If the URL contains an **invite** token (`invite` or `inviteToken`), that flow **takes precedence** and the automatic `emailAddress` behaviour does not apply in the same way.
+
+#### Profile prefill: `firstName`, `lastName`, `phoneNumber`
+
+- **`firstName`**, **`lastName`**, and **`phoneNumber`** (alternatively **`prefillPhoneNumber`** for phone) are read from the query string and sent with **`/start`** as profile hints (`firstName`, `lastName`, `prefillPhoneNumber`) so the gateway can attach them to the guest/stub user before registration is finished.
+- They also **prefill** the inline name and phone controls where relevant (e.g. email-only vs phone-only vs combined entry mode).
+
+#### Lead capture field prefill
+
+- For the **lead capture** step, additional query parameters can map into form fields when each field has a configured **`queryParamKey`** that matches the parameter name. Empty fields are filled from the URL; behaviour respects **`queryParamAllowManualEdit`** (whether the user may override query-sourced values).
+- Common keys such as **`emailAddress`**, **`firstName`**, **`lastName`**, and **`phoneNumber`** work when the published field’s query param key is set to match (so your integration and the page builder stay aligned).
+
+Together, this allows deep links that **prefill identity and contact data** and **trigger OTP delivery** automatically, while **OTP entry remains required** for new or unverified guests.
+
 ## Endpoints
 
 ### Page Management
