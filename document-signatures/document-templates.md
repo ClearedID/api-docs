@@ -494,6 +494,16 @@ Create a new document from a template by mapping roles to actual signers.
 ```json
 {
   "title": "Employment Contract - John Smith",
+  "sendImmediately": true,
+  "configuration": {
+    "enforceSigningOrder": true,
+    "requireIdVerification": false,
+    "useDigitalSignature": true,
+    "expiration": {
+      "type": "relative",
+      "relativeDays": 30
+    }
+  },
   "signingParties": [
     {
       "id": "signer_1",
@@ -523,13 +533,23 @@ Create a new document from a template by mapping roles to actual signers.
 
 **Request Parameters**:
 - `title` (string, optional) - Document title (defaults to template title)
+- `sendImmediately` (boolean, optional) - When `true`, the new document is immediately queued for sending (`status: "enqueued"`). Defaults to `false` (`status: "draft"`).
+- `configuration` (object, optional) - Document send/configuration options. When `sendImmediately` is `true`, this configuration is applied and enforced at queue time (including digital signature and expiration settings). If omitted, template defaults are used.
+- `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
+- `configuration.requireIdVerification` (boolean, optional) - Require ID verification
+- `configuration.useDigitalSignature` (boolean, optional) - Enable digital signature/seal flow
+- `configuration.expiration` (object, optional) - Expiration settings
+  - `type` (`none` | `fixed` | `relative`)
+  - `fixedDate` (ISO date string, when `type=fixed`)
+  - `relativeDays` (number, when `type=relative`)
 - `signingParties` (array, required) - Array of actual signers
   - `id` (string, required) - Unique signer identifier
-  - `roleId` (string, required) - Role from template this signer fills
+  - `roleId` (string, recommended) - Role ID from template this signer fills
+  - `role` (string, recommended when `roleId` not provided) - Role name from template for fallback matching
+  - `roleName` (string, optional) - Alias for `role` during fallback matching
   - `userId` (string, optional) - User ID if known
   - `name` (string, required) - Signer's full name
   - `email` (string, required) - Signer's email
-  - `role` (string, optional) - Signer's role/title
   - `order` (number, required) - Signing order
   - `enforceOrder` (boolean, optional) - Enforce signing order
   - `requireIdVerification` (boolean, optional) - Require ID verification
@@ -592,13 +612,14 @@ Create a new document from a template by mapping roles to actual signers.
 **Automatic Updates**:
 - Template `usageCount` is incremented
 - Template `lastUsedAt` is updated to current timestamp
-- Created document is in `draft` status and ready to be configured/sent
+- Created document is in `draft` status by default and ready to be configured/sent
+- If `sendImmediately: true`, created document is immediately queued (`status: "enqueued"`) and `sentAt` is set
+- If `sendImmediately: true` and `configuration.expiration` is provided, `expiresAt` is calculated and applied during queueing
 
 **Notes**:
 - Must provide signer for each role in template
-- Role-to-signer mapping is done via `roleId` field
-- If role mapping fails, attempts to map by order
-- New document inherits template's configuration
+- Role-to-signer mapping prefers `roleId`; if missing, it falls back to role-name matching using `role`/`roleName` when the match is unambiguous
+- New document inherits template configuration by default; request `configuration` can override those values at instantiate time
 - PDF and page images are reused from template
 
 ---
@@ -925,6 +946,13 @@ const instantiateResponse = await fetch(
     },
     body: JSON.stringify({
       title: 'Employment Contract - John Smith',
+      sendImmediately: true, // Optional: queue/send right after instantiation
+      configuration: {
+        enforceSigningOrder: true,
+        requireIdVerification: false,
+        useDigitalSignature: true,
+        expiration: { type: 'relative', relativeDays: 30 }
+      },
       signingParties: [
         {
           id: 'signer_1',
@@ -947,9 +975,7 @@ const instantiateResponse = await fetch(
   }
 );
 const { data: { documentId } } = await instantiateResponse.json();
-
-// 5. Send document (see Document API for details)
-// ...
+// Document is already queued for sending when sendImmediately is true.
 ```
 
 ---
@@ -975,7 +1001,8 @@ const { data: { documentId } } = await instantiateResponse.json();
 - Review and update templates quarterly
 
 ### 4. Role Mapping
-- Always provide `roleId` when instantiating
+- Prefer `roleId` when instantiating
+- If `roleId` is unavailable, provide `role` (or `roleName`) that exactly matches the template role name
 - Verify all roles are mapped to signers
 - Use consistent role IDs across similar templates
 
