@@ -252,6 +252,7 @@ Future<WebViewController> createHostedWebViewController() async {
   if (!kIsWeb && Platform.isAndroid) {
     final platform = controller.platform;
     if (platform is AndroidWebViewController) {
+      await platform.setGeolocationEnabled(true);
       await platform.setOnShowFileSelector(_pickFilesForAndroidWebView);
       await platform.setGeolocationPermissionsPromptCallbacks(
         onShowPrompt: (GeolocationPermissionsRequestParams request) async {
@@ -410,9 +411,10 @@ await controller.setOnConsoleMessage((message) {
 ### 7.6 Integration checklist
 
 1. **`fromPlatformCreationParams`** + **`onPermissionRequest`** → request OS permission → **`request.grant()`** when appropriate.
-2. **`AndroidWebViewController.setOnShowFileSelector`** returns **URI strings**, not raw paths.
-3. **`loadRequest`** runs after **`WebViewWidget`** exists (post-frame after **`setState`**).
-4. Use **HTTPS** for the hosted URL. If the host rejects default WebView user agents, set a **`User-Agent`** per your integration agreement.
+2. **`AndroidWebViewController.setGeolocationEnabled(true)`** before **`setGeolocationPermissionsPromptCallbacks`** / file selector when address flows use **`navigator.geolocation`**.
+3. **`AndroidWebViewController.setOnShowFileSelector`** returns **URI strings**, not raw paths.
+4. **`loadRequest`** runs after **`WebViewWidget`** exists (post-frame after **`setState`**).
+5. Use **HTTPS** for the hosted URL. If the host rejects default WebView user agents, set a **`User-Agent`** per your integration agreement.
 
 ### 7.7 Logging (optional)
 
@@ -447,6 +449,8 @@ Typical identity flows in a WebView:
 **Address verification (same WebView host):**
 
 - **`navigator.geolocation`** — On **Android**, register **`setGeolocationPermissionsPromptCallbacks`**, request **location** runtime permission, then return **`GeolocationPermissionsResponse(allow: true, …)`**. Declare **`ACCESS_FINE_LOCATION`** / **`ACCESS_COARSE_LOCATION`** in the manifest. On **iOS**, add **`NSLocationWhenInUseUsageDescription`**.
+- **Cleared-hosted pages** call **`getCurrentPosition`** with **moderate** options (not **high accuracy** with a **short timeout**): embedded **WebView** often needs longer to obtain a fix than **Chrome** on the same device, and the same error UI is shown for **timeout** and **permission denied**. If you fork the hosted UI, keep the same pattern for WebView parity.
+- **Android WebView:** call **`AndroidWebViewController.setGeolocationEnabled(true)`** explicitly when configuring the controller (default is usually true; setting it avoids edge cases on some devices).
 - **Proof-of-address file** — Prefer an explicit **`accept`** that includes **PDF** (e.g. `image/*` and `application/pdf`) so native pickers can match the page; if **`accept` is empty**, use **`FileType.any`** (or equivalent) for the file chooser so PDFs are not excluded.
 
 Coordinate **environment URLs** (e.g. QA vs production) with Cleared as part of your rollout.
@@ -463,6 +467,7 @@ Coordinate **environment URLs** (e.g. QA vs production) with Cleared as part of 
 | Camera never opens | Permission or intent resolution | Runtime + manifest permissions; `<queries>` |
 | Gallery empty / cannot pick | Media permissions on API 33+ | `READ_MEDIA_*` |
 | Black in-page preview but file path works | `getUserMedia` not granted | `onPermissionRequest` + HTTPS |
+| “Could not get your location” in WebView; Chrome OK | **Timeout** (`enableHighAccuracy` + short `timeout`), or **OS location** denied for **your app** (not Chrome), or missing **WebView geolocation callback** | Match Cleared-hosted **`getCurrentPosition`** options; grant **Location** to the host app in system settings; implement **`setGeolocationPermissionsPromptCallbacks`** + **`setGeolocationEnabled(true)`** ([§7](#7-flutter-implementation-guide), [§10](#10-hosted-page-behaviour-summary)) |
 
 ---
 
@@ -476,6 +481,7 @@ Test on a **physical Android device** (WebView differs from Chrome).
 - [ ] **Cancel picker:** No crash; user can retry.
 - [ ] **Deny camera permission:** Your app shows a clear message or retry path.
 - [ ] **Cold start:** No race where **`loadRequest`** runs before the platform **`WebView`** exists (Flutter: post-frame after **`setState`** with controller).
+- [ ] **Address “Get location”:** Completes in embedded WebView (not only in Chrome); user has granted **Location** to **your** app when the system prompt appears.
 
 ---
 
@@ -504,3 +510,4 @@ For **session APIs**, **authentication headers**, **allowed origins**, or **host
 | 1.3 | 2026-04-27 | Address verification: geolocation + PDF / empty-`accept` file picker notes ([§10](#10-hosted-page-behaviour-summary)) |
 | 1.4 | 2026-04-27 | Flutter-first guide: removed Kotlin sample block; §8 explains stack choice |
 | 1.5 | 2026-04-27 | §5 expanded: manifest, runtime, and WebView permission bridges (“entitling” the WebView) |
+| 1.6 | 2026-04-27 | WebView geolocation: **`setGeolocationEnabled(true)`**, hosted **`getCurrentPosition`** tuning vs Chrome, troubleshooting + QA ([§7.6](#76-integration-checklist), [§10](#10-hosted-page-behaviour-summary), [§11](#11-troubleshooting), [§12](#12-qa-checklist)) |
