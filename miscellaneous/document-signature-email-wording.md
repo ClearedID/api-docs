@@ -2,38 +2,36 @@
 
 This document shows **sample messages** as recipients see them, with **`{{placeholder}}`** tokens where values are filled at send time. Use the **Placeholder glossary** to interpret each field.
 
-Technical source paths are in **Appendix** at the bottom.
-
 ---
 
 ## Placeholder glossary
 
 | Placeholder | Meaning |
 |-------------|---------|
-| `{{signer_email}}` | Email address of the signer (To-address for invitation and signer completion). |
-| `{{merchant_contact_email}}` | Email address of the merchant client (To-address for client completion). |
+| `{{signer_email}}` | Email address of the signer (used as the recipient address for invitation and signer completion messages). |
+| `{{merchant_contact_email}}` | Email address of the organisation contact (used as the recipient address for merchant completion messages). |
 | `{{document_title}}` | Title of the signature document. |
 | `{{signer_name}}` | Full name of the signer receiving the email. |
 | `{{organisation_name}}` | Sending organisation’s display name (company). |
-| `{{signing_link_url}}` | Time-limited URL to open the signing flow (includes auth token in query string). |
-| `{{sender_custom_message}}` | Optional note from the sender; **only included when set** on the document. Plain text, HTML-escaped in production. |
-| `{{link_validity_sentence}}` | Either `This link is valid until {{document_expiry_date}}` (UK-style long date) **or** `This link is valid for 7 days` if no document expiry. |
-| `{{document_expiry_date}}` | Human-readable expiry date for the signing link (when document expiry is configured). |
-| `{{identity_verification_notice}}` | Optional warning sentence(s) when ID verification is required before signing (see sample). |
-| `{{pdf_view_url}}` | Time-limited signed URL to **view** the finalized PDF in browser (~7 days). |
-| `{{pdf_download_url}}` | Time-limited signed URL to **download** the finalized PDF (~7 days). |
-| `{{client_greeting_name}}` | Merchant contact name for greeting (display name or first name; may fall back to a neutral form). |
-| `{{signer_count}}` | Number of signing parties on the document (integer). |
+| `{{signing_link_url}}` | Secure link to open the signing flow. |
+| `{{sender_custom_message}}` | Optional note from the sender; **only included when provided** for that document. |
+| `{{link_validity_sentence}}` | Either `This link is valid until {{document_expiry_date}}` (long date style) **or** `This link is valid for 7 days` if no document expiry is set. |
+| `{{document_expiry_date}}` | Human-readable expiry date for the signing link (when configured). |
+| `{{identity_verification_notice}}` | Optional warning when identity verification is required before signing (see Sample 1). |
+| `{{pdf_view_url}}` | Time-limited link to **view** the finalized PDF in a browser (typically about **7 days**). |
+| `{{pdf_download_url}}` | Time-limited link to **download** the finalized PDF (typically about **7 days**). |
+| `{{client_greeting_name}}` | Merchant contact name for the greeting (display name or first name; may use a neutral greeting if needed). |
+| `{{signer_count}}` | Number of signing parties on the document. |
 | `{{signers_plural_word}}` | Either `person` or `people` (matches `{{signer_count}}`). |
-| `{{completed_date}}` | Date the completion email was sent (locale-formatted). |
-| `{{merchant_documents_dashboard_url}}` | Link to the merchant portal documents screen for this document. |
-| `{{merchant_portal_base_url}}` | Base URL of the merchant portal (environment-dependent). |
+| `{{completed_date}}` | Date the completion message was sent (locale-formatted). |
+| `{{merchant_documents_dashboard_url}}` | Link to open this document in the merchant documents area. |
+| `{{merchant_portal_base_url}}` | Base web address of the merchant portal for your environment. |
 
 ---
 
 ## Sample 1 — Signature request (email to signer)
 
-**Recipient:** signer (`{{signer_email}}` — not shown in body; used as To-address).
+**Recipient:** signer (`{{signer_email}}` — used as the To-address; not repeated inside the email body).
 
 **Subject**
 
@@ -92,7 +90,7 @@ You have been invited to sign the following document:
 Document: Loan Agreement — March 2026
 Sender: Acme Finance Ltd
 
-[ Sign Document Now → https://cleared.id/sign/flow?documentId=…&signerId=…&token=… ]
+[ Sign Document Now → https://… ]
 
 Important Information:
  • This link is valid until 15 August 2026
@@ -104,7 +102,7 @@ Important Information:
 
 ## Sample 2 — Fully signed (email to each signer)
 
-**Recipient:** each signer with an email on the document.
+**Recipient:** each signer on the document who has an email address.
 
 **Subject**
 
@@ -142,13 +140,13 @@ Best regards,
 Cleared Identity Limited
 ```
 
-*(Production HTML uses Cleared styling and a Cleared header logo; wording above matches the template.)*
+The live email may use a branded layout (colours, logo); the **wording** matches the sample above.
 
 ---
 
-## Sample 3 — Fully signed (email to client / merchant)
+## Sample 3 — Fully signed (email to merchant / organisation contact)
 
-**Recipient:** client account email (`{{merchant_contact_email}}` — To-address; not shown in body).
+**Recipient:** organisation contact (`{{merchant_contact_email}}` — To-address; not shown in body).
 
 **Subject**
 
@@ -181,7 +179,6 @@ You can view the signed document in your browser or download it to your computer
 
 📁 Document Management: You can also access this document anytime from your Documents Dashboard:
    {{merchant_documents_dashboard_url}}
-   (typically under {{merchant_portal_base_url}}/documents?id=<document id>)
 
 The signed document will be available for download for the next 7 days. Please save a copy to your computer.
 
@@ -194,9 +191,9 @@ Digital Document Signatures | Identity Verification
 
 ---
 
-## Sample 4 — Fully signed (alternate client email, shorter)
+## Sample 4 — Fully signed (alternate merchant email, shorter)
 
-Used when completion is finalized after identity verification clearance on some flows.
+You may receive this shorter version in some completion scenarios (for example when everything finishes after identity checks).
 
 **Subject**
 
@@ -223,7 +220,7 @@ Download document → {{pdf_download_url}}
 
 ## Sample 5 — Push notification (merchant app, paired with completion)
 
-Not an email; included because it ships with the same milestone.
+Not an email; sent around the same milestone as the merchant completion email.
 
 | Field | Sample value |
 |-------|----------------|
@@ -232,67 +229,8 @@ Not an email; included because it ships with the same milestone.
 
 ---
 
-## Appendix — template inventory (engineering)
+## Notes
 
-### 1. Signature request (email to signer)
-
-**Where:** `swf-machine-runner.ms` → `generateEmailTemplate` / `sendSignerEmail` (`index.js`).
-
-**Subject line**
-
-- `Document Signature Request: ` + document title
-
-**Email title (HTML)**
-
-- `Document Signature Request`
-
-**Header**
-
-- `Document Signature Request` / `You have been invited to sign a document`
-
-**Optional blocks**
-
-- `Message from sender` + custom message (escaped).
-- IDV: `IMPORTANT: Identity verification will be required before signing this document.`
-
-**CTA**
-
-- `Sign Document Now`
-
-**Important box**
-
-- `Important Information:` + bullets using `{{link_validity_sentence}}` pattern above + optional IDV bullet + contact sender.
-
-**Footer**
-
-- `This is an automated message. Please do not reply to this email.`
-
----
-
-### 2. Fully signed — email to each signer
-
-**Where:** `swf-core-gateway` → `services/sslcom-esigner.js` → `notifySignersOfCompletion`.
-
-**Subject:** `Document Signed: ` + title.
-
-**Sender display:** `Cleared` (with Cleared header logo in HTML).
-
----
-
-### 3. Fully signed — email to client (merchant)
-
-**Where:** `swf-machine-runner.ms` → `notifyClientOfDocumentCompletion` (`index.js`).
-
----
-
-### 4. Fully signed — alternate client email
-
-**Where:** `swf-core-gateway` → `utils/publicSignatureSigningAuxRoutes.cjs`.
-
----
-
-## Notes for the client
-
-1. **Resend / remind from API:** In `swf-core-gateway/routes/gatewayHttpRegs.cjs`, “resend” / “remind” helpers are stubs (log only). Live **signer invitation** copy is **Sample 1** (machine-runner).
-2. **Links:** Invitation uses `{{signing_link_url}}`; completion emails use `{{pdf_view_url}}` / `{{pdf_download_url}}` (typically **7-day** signed URLs).
-3. **Branding:** HTML templates include Cleared colours and some emoji in headings; signer completion sign-off references **Cleared Identity Limited**.
+1. **Links:** The invitation uses `{{signing_link_url}}`. Completion messages use `{{pdf_view_url}}` and `{{pdf_download_url}}`; those PDF links are usually valid for **about 7 days**.
+2. **Branding:** Messages may use Cleared styling in HTML (colours, logo). Signer completion closes with **Cleared Identity Limited**.
+3. **Samples 3 and 4:** Both notify the merchant when a document is fully complete; which layout you see can depend on how the flow completes.
