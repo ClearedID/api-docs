@@ -182,6 +182,7 @@ When a loan (or other case) requires **several** related documents signed by the
 - **Body** (gateway contract):
   - **`title`** (string, optional): Used as the envelope **name**; if omitted, the envelope template’s title is used.
   - **`configuration`** (object, optional) and/or **`useDigitalSignature`** (boolean, optional) at **root**: merged into **every** included document’s configuration (on top of each document template’s published configuration).
+  - **`sendImmediately`** (boolean, optional): when **`true`**, after documents are created the gateway marks the envelope **sent** and each document **enqueued** (same idea as **`sendImmediately`** on single-document template instantiate). Optional **`message`** is stored on each document, matching **`POST …/signatures/envelopes/:envelopeId/send`**. When **`false`** or omitted, the envelope stays **draft** until you call send separately.
   - **`documentAssignments`** (array, required): One entry per document template in the package you want to drive.
     - **`templateId`**: ID of the **document template** slot (must match a template in the envelope template).
     - **`isIncluded`**: If `true`, a document is created from that template; at least one must be included.
