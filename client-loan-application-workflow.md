@@ -1,15 +1,16 @@
 # ABC Company LLC – Cleared Workflow Documentation
 
-This document describes the end-to-end workflows for the two Cleared features used by the ABC Company LLC: **Identity Verification** via onboarding pages and **Digital Signatures** via document templates. It is intended for both business stakeholders and technical integrators (ABC Company LLC student portal and Loan Origination System).
+This document describes the end-to-end workflows for the Cleared features used by the ABC Company LLC: **Identity Verification** via onboarding pages and **Digital Signatures** via **document templates** (single document) or **envelope templates** (multi-document package). It is intended for both business stakeholders and technical integrators (ABC Company LLC student portal and Loan Origination System).
 
 ---
 ## Table of Contents
 1. [Overview and system roles](#overview-and-system-roles)
 2. [Identity verification workflow](#identity-verification-workflow)
 3. [Digital signatures workflow](#digital-signatures-workflow)
-4. [Webhook contracts and security](#webhook-contracts-and-security)
-5. [Failure handling and retries](#failure-handling-and-retries)
-6. [Reference: key endpoints and files](#reference-key-endpoints-and-files)
+4. [Digital signatures: envelope pathway (multi-document)](#digital-signatures-envelope-pathway-multi-document)
+5. [Webhook contracts and security](#webhook-contracts-and-security)
+6. [Failure handling and retries](#failure-handling-and-retries)
+7. [Reference: key endpoints and files](#reference-key-endpoints-and-files)
 
 ---
 ## Overview and system roles
@@ -18,7 +19,7 @@ This document describes the end-to-end workflows for the two Cleared features us
 | **ABC Company LLC student portal** | Initiates login/onboarding; redirects students to Cleared for IDV; can offer document signing entry and phase-1 document upload. |
 | **Cleared Screening Portal** | Where ABC Company LLC configures onboarding pages (redirect URL, webhooks, URL parameters) and document templates. |
 | **Cleared (Onboarding web app + API)** | Hosts the onboarding wizard and IDV; issues signing links and collects signatures. |
-| **Loan Origination System** | Consumes Cleared APIs to create document instances from portal-configured templates and send for signature; receives webhooks for IDV completion and document signing events. |
+| **Loan Origination System** | Consumes Cleared APIs to create document instances from portal-configured **document** or **envelope** templates and send for signature; receives webhooks for IDV completion and document signing events. |
 
 ---
 ## Identity verification workflow
@@ -83,9 +84,9 @@ After all steps (and any consent to share results), when the user clicks the fin
 
 ---
 ## Digital signatures workflow
-ABC Company LLC maintains **document templates** in Cleared (one per document type). The Loan Origination System (or ABC Company LLC) **instantiates** a template to create a document, assigns the student as signer, and **sends** the document. The student receives an invitation, signs (and can upload attachments in phase 1). When the document is fully signed, Cleared applies a digital seal, sends the signed document to the student, and notifies the ABC Company LLC administrator (client). Optional **outbound webhooks** can notify the Loan Origination System on each sign event.
+ABC Company LLC can maintain **document templates** in Cleared (one per document type) and use the flow below for a **single** document. For **loan packages** (agreement + note + disclosure, etc.), ABC Company LLC may instead configure **envelope templates** and use the [envelope pathway](#digital-signatures-envelope-pathway-multi-document)—same signing and webhook behaviour per document, with one envelope send covering all documents.
 
-### High-level flow
+### High-level flow (single document)
 1. **ABC Company LLC** administers document templates in the Cleared Screening Portal.
 2. **Loan Origination System** (or ABC Company LLC), for a given loan application, calls the **instantiate** API with the template ID and the **signing parties** (student name and email for each role).
 3. Loan Origination System then calls the **send** API for the created document (with expiration, optional message). Cleared enqueues the document; **Cleared processing** sends **invitation emails** to signers with signing links.
@@ -102,7 +103,7 @@ ABC Company LLC maintains **document templates** in Cleared (one per document ty
 
 ### Instantiating a document (Loan Origination System)
 - **Endpoint**: `POST /api/v1/merchant/signatures/templates/:templateId/instantiate`
-- **Body**: `title` (optional), `signingParties`: array of `{ id, roleId, name, email, role, order, ... }`.
+- **Body**: `title` (optional), `signingParties`: array of `{ id, roleId, name, email, role, order, ... }`, optional `sendImmediately`, optional `configuration` (e.g. `useDigitalSignature`, `expiration`), and optional top-level **`useDigitalSignature`** (boolean) merged with `configuration` for the created document.
 - **Response**: `documentId` and the created document (status `draft`). Template roles are mapped to the provided signers; fields are assigned to those signers.
 
 Example: one signer (student) for role “Borrower”:
@@ -165,6 +166,186 @@ After all signers have signed:
 So the “document gets sent to ABC Company LLC administrator” is implemented as this **email + push** with view/download links and dashboard link; there is no separate “forward document” API.
 
 ---
+## Digital signatures: envelope pathway (multi-document)
+When a loan (or other case) requires **several** related documents signed by the same parties, ABC Company LLC configures an **envelope template** in the Cleared Screening Portal (Documents → Templates → Envelope templates). The template lists **document templates** in order and defines roles per document. The Loan Origination System **instantiates** the envelope template (creating one envelope and one **draft** document per included document template), then **sends the envelope** so signers get a unified experience. Per-document **webhooks** and completion behaviour match the single-document flow above.
+
+### High-level flow (envelope)
+1. **ABC Company LLC** builds an **envelope template** in the portal (e.g. loan agreement + promissory note + disclosure), each slot pointing at an existing **document template** with roles.
+2. **Loan Origination System** stores the **envelope template ID** for that product (parallel to storing per-document template IDs).
+3. For a given application, LOS calls **instantiate envelope template** with a display **title**, which documents are **included**, and **signing parties per included document** (names, emails, `roleId` aligned to each document template’s roles where possible).
+4. LOS calls **get envelope documents** to read created documents and their IDs (needed for the next step).
+5. LOS calls **send envelope** with an optional **message** and **per-document digital signature flags** (`documentConfigurations`). Cleared deducts credits, sets the envelope and documents to **sent** / **enqueued**, and queues invitation emails.
+6. **Student** signs each document (same public sign endpoint and webhooks as single-document flow). When all documents are complete, notifications follow the same completion rules as for individual documents.
+
+### Instantiating an envelope from an envelope template (Loan Origination System)
+- **Endpoint**: `POST /api/v1/merchant/signatures/envelope-templates/:templateId/instantiate`
+- **Body** (gateway contract):
+  - **`title`** (string, optional): Used as the envelope **name**; if omitted, the envelope template’s title is used.
+  - **`configuration`** (object, optional) and/or **`useDigitalSignature`** (boolean, optional) at **root**: merged into **every** included document’s configuration (on top of each document template’s published configuration).
+  - **`documentAssignments`** (array, required): One entry per document template in the package you want to drive.
+    - **`templateId`**: ID of the **document template** slot (must match a template in the envelope template).
+    - **`isIncluded`**: If `true`, a document is created from that template; at least one must be included.
+    - **`signingParties`**: Same shape as single-document instantiate—`id`, `name`, `email`, `role`, `order`, optional `roleId` (maps template roles to signers for field placement), `enforceOrder`, `requireIdVerification`, etc.
+    - **`configuration`** (object, optional) and/or **`useDigitalSignature`** (boolean, optional) on the **assignment**: merged into **that** document only; overrides the root `configuration` / `useDigitalSignature` for the same keys.
+
+**Response** (success): `data.envelopeId` and `data.envelope` (draft envelope). Document rows are created server-side; use **`GET /api/v1/merchant/signatures/envelopes/:envelopeId/documents`** — response `data` is an **array** of `{ _id, title, status, signingParties, ... }` — to build **`documentConfigurations`** before send.
+
+Example body (borrower only; two documents included, roles must match what each document template defines—use `GET .../envelope-templates/:id` to inspect `documentTemplates` and role ids):
+
+```json
+{
+  "title": "Loan package – Jane Smith – APP-12345",
+  "documentAssignments": [
+    {
+      "templateId": "507f1f77bcf86cd799439070",
+      "isIncluded": true,
+      "signingParties": [
+        {
+          "id": "signer_borrower_1",
+          "roleId": "role_borrower",
+          "name": "Jane Smith",
+          "email": "jane.smith@example.com",
+          "role": "Borrower",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "templateId": "507f1f77bcf86cd799439071",
+      "isIncluded": true,
+      "signingParties": [
+        {
+          "id": "signer_borrower_1",
+          "roleId": "role_borrower",
+          "name": "Jane Smith",
+          "email": "jane.smith@example.com",
+          "role": "Borrower",
+          "order": 1
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Sending the envelope (Loan Origination System)
+- **Endpoint**: `POST /api/v1/merchant/signatures/envelopes/:envelopeId/send`
+- **Body** (gateway contract):
+  - **`message`** (string, optional): Shown to signers / stored on the envelope and documents.
+  - **`documentConfigurations`** (array, optional): `{ "id": "<documentMongoId>", "useDigitalSignature": true|false }` per document in the envelope. If omitted for a document, the gateway defaults **`useDigitalSignature` to `true`** when calculating credits.
+
+Credits are summed from all documents (e.g. digital vs regular per-document), checked against the organisation balance, then deducted. All documents move to **enqueued** for outbound processing.
+
+### Sample code (Node.js, merchant API)
+Replace `BASE_URL`, `MERCHANT_JWT`, template and signer values with your environment. Uses `fetch` and the instantiate → get → send sequence.
+
+```javascript
+const BASE_URL = 'https://cleared.id'; // or your Cleared API host
+const MERCHANT_JWT = process.env.CLEARED_MERCHANT_JWT; // Bearer token
+
+const envelopeTemplateId = '507f1f77bcf86cd799439090';
+
+// 1) Create draft envelope + documents from envelope template
+const instRes = await fetch(
+  `${BASE_URL}/api/v1/merchant/signatures/envelope-templates/${envelopeTemplateId}/instantiate`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${MERCHANT_JWT}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      title: 'Loan package – Jane Smith – APP-12345',
+      documentAssignments: [
+        {
+          templateId: '507f1f77bcf86cd799439070',
+          isIncluded: true,
+          signingParties: [
+            {
+              id: 'signer_borrower_1',
+              roleId: 'role_borrower',
+              name: 'Jane Smith',
+              email: 'jane.smith@example.com',
+              role: 'Borrower',
+              order: 1
+            }
+          ]
+        },
+        {
+          templateId: '507f1f77bcf86cd799439071',
+          isIncluded: true,
+          signingParties: [
+            {
+              id: 'signer_borrower_1',
+              roleId: 'role_borrower',
+              name: 'Jane Smith',
+              email: 'jane.smith@example.com',
+              role: 'Borrower',
+              order: 1
+            }
+          ]
+        }
+      ]
+    })
+  }
+);
+const instJson = await instRes.json();
+if (!instRes.ok || !instJson.success) {
+  throw new Error(instJson.message || 'Instantiate failed');
+}
+const envelopeId = instJson.data.envelopeId;
+
+// 2) Load envelope documents to obtain Mongo IDs for send()
+const getRes = await fetch(
+  `${BASE_URL}/api/v1/merchant/signatures/envelopes/${envelopeId}/documents`,
+  {
+    headers: { Authorization: `Bearer ${MERCHANT_JWT}` }
+  }
+);
+const getJson = await getRes.json();
+if (!getRes.ok || !getJson.success) {
+  throw new Error(getJson.message || 'Get envelope documents failed');
+}
+const docs = Array.isArray(getJson.data) ? getJson.data : [];
+
+const documentConfigurations = docs.map((d) => ({
+  id: d._id,
+  useDigitalSignature: true // set false where you want regular signature pricing
+}));
+
+// 3) Send entire envelope (invitations for all documents)
+const sendRes = await fetch(
+  `${BASE_URL}/api/v1/merchant/signatures/envelopes/${envelopeId}/send`,
+  {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${MERCHANT_JWT}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Please review and sign your loan documents.',
+      documentConfigurations
+    })
+  }
+);
+const sendJson = await sendRes.json();
+if (!sendRes.ok || !sendJson.success) {
+  throw new Error(sendJson.message || 'Send envelope failed');
+}
+console.log('Envelope sent:', sendJson.data);
+```
+
+### Webhooks and student experience (envelope)
+- Each **document** in the envelope can still have **`webhookConfig`**; signer submissions continue to POST **`document_signed`** events per document (see [Digital signatures workflow](#digital-signatures-workflow)).
+- Signers typically receive coordinated invitations for the package; tracking at envelope level is available via `GET /api/v1/merchant/signatures/envelopes/:envelopeId` (see [Envelopes API](./document-signatures/envelopes.md)).
+
+### Further reading
+- [Envelope templates API](./document-signatures/envelope-templates.md) — list, get, create, save, duplicate, **instantiate**, delete.
+- [Envelopes API](./document-signatures/envelopes.md) — list, get, **send**, cancel, history, and related operations.
+
+**Note:** Some older API reference examples may show alternate request shapes for instantiate/send; the **title** + **documentAssignments** instantiate body and **message** + **documentConfigurations** send body above match the current **swf-core-gateway** merchant routes.
+
+---
 ## Webhook contracts and security
 
 ### Onboarding (IDV) webhook
@@ -203,5 +384,9 @@ If ABC Company LLC uses Verification Links instead of (or in addition to) onboar
 | Onboarding route | `POST /cleared/onboarding/:pageId/route` | Start/link session (urlParamValues, flowStateId, flowRequestId) |
 | Document instantiation (workflow) | `POST /api/v1/merchant/signatures/templates/:templateId/instantiate` | Create a document instance from a portal-configured template |
 | Documents | `POST /api/v1/merchant/signatures/documents/:documentId/send` | Send document for signing |
+| Envelope template → envelope | `POST /api/v1/merchant/signatures/envelope-templates/:templateId/instantiate` | Create draft envelope and documents from an envelope template (`title`, `documentAssignments`) |
+| Envelopes | `GET /api/v1/merchant/signatures/envelopes/:envelopeId/documents` | List documents in the envelope (`data` is an array; use each `_id` in `documentConfigurations`) |
+| Envelopes | `GET /api/v1/merchant/signatures/envelopes/:envelopeId` | Read envelope metadata (status, counts) |
+| Envelopes | `POST /api/v1/merchant/signatures/envelopes/:envelopeId/send` | Send all documents in the envelope (`message`, `documentConfigurations`) |
 | Public sign | `POST /api/v1/public/signatures/documents/sign` | Submit signature (fieldValues, uploadedAttachments) |
 

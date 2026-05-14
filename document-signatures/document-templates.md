@@ -535,6 +535,7 @@ Create a new document from a template by mapping roles to actual signers.
 - `title` (string, optional) - Document title (defaults to template title)
 - `sendImmediately` (boolean, optional) - When `true`, the new document is immediately queued for sending (`status: "enqueued"`). Defaults to `false` (`status: "draft"`).
 - `configuration` (object, optional) - Document send/configuration options. When `sendImmediately` is `true`, this configuration is applied and enforced at queue time (including digital signature and expiration settings). If omitted, template defaults are used.
+- `useDigitalSignature` (boolean, optional) - Same as `configuration.useDigitalSignature`. If present as a JSON boolean (`true` / `false`), it is merged into document configuration after `configuration` (so it overrides `configuration.useDigitalSignature` when both are sent).
 - `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
 - `configuration.requireIdVerification` (boolean, optional) - Require ID verification
 - `configuration.useDigitalSignature` (boolean, optional) - Enable digital signature/seal flow
