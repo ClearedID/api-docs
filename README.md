@@ -34,6 +34,16 @@ New to the Cleared API? Follow these steps:
 
 ---
 
+## 📱 Client integrations (embedded WebView)
+
+If you load **Cleared-hosted** verification pages inside a **native mobile WebView** (not the system browser), the app must implement **Android file choosers**, **runtime permissions**, and (for address flows) **geolocation** bridging. These guides are **not** REST API references.
+
+| Document | Description |
+|----------|-------------|
+| **[Mobile WebView: file upload, camera, and identity flows](./integrations/mobile-webview-verification.md)** | Flutter + `webview_flutter`: `<input type="file">`, camera capture, PDF, mic, and `navigator.geolocation` |
+
+---
+
 ## 🔐 Verification Services
 
 ### Identity Verification
@@ -117,6 +127,19 @@ Create shareable verification links for customer self-service verification.
 *Documentation coming soon*
 
 **Services**: Business registration, TRN validation, corporate identity checks
+
+---
+
+### CourtHits — court records & screening
+
+**CourtHits** is exposed as the **CourtHits API**: organisation-authenticated **court record** search (detail, related hits, disputes), **company registry** search and profiles, **adverse media**, **sanctions & PEP** screening, **cached snapshot reload**, and **saved screening queries**.
+
+| Document | Description |
+|----------|-------------|
+| **[CourtHits API overview](./courthits/README.md)** | Audience, base URL, authentication, and index of CourtHits docs |
+| **[CourtHits API reference & examples](./courthits/courthits-search-api.md)** | Endpoints with request/response examples (cURL + JSON) |
+
+**CourtHits API base path:** `/api/v1/services/courthits`
 
 ---
 
@@ -256,8 +279,9 @@ curl -X POST https://cleared.id/api/v1/merchant/signatures/documents/create \
 | **Digital Signatures** | 5 files | 56 endpoints | Document and envelope signing |
 | **Onboarding Pages** | 1 file | 12 endpoints | Custom onboarding workflows |
 | **Merchant Updates** | 1 file | 6 endpoints | Real-time notifications |
+| **Client integrations (mobile WebView)** | 1 file | — | Embedded WebView setup (not HTTP endpoints) |
 
-**Total**: 23 files, 151 endpoints documented
+**Total**: 24 files, 151 endpoints documented
 
 ---
 
@@ -275,6 +299,9 @@ api-docs/
 ├── verification-requests-management.md   # Manage requests
 ├── merchant-updates.md                   # Notification system
 ├── onboarding-pages.md                   # Onboarding workflows
+│
+├── integrations/
+│   └── mobile-webview-verification.md    # Mobile WebView: files, camera, geo
 │
 ├── identity/
 │   ├── identity-api.md                   # Identity service overview
@@ -340,6 +367,9 @@ api-docs/
 2. Monitor request status
 3. Receive clearance notification
 4. Store verification results for compliance
+
+### Use Case 6: ABC Company LLC Loan Application Workflow
+Follow this end-to-end workflow for ABC Company LLC onboarding (IDV via onboarding pages + redirect) and contract signing (document templates, eSeal, and outbound webhooks): [ABC Company LLC – Cleared Workflow Documentation](./client-loan-application-workflow.md)
 
 ---
 
