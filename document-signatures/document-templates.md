@@ -543,6 +543,7 @@ Create a new document from a template by mapping roles to actual signers.
   - `type` (`none` | `fixed` | `relative`)
   - `fixedDate` (ISO date string, when `type=fixed`)
   - `relativeDays` (number, when `type=relative`)
+- `fieldValues` (object, optional) - Map of **published field id** → value to store on the created document (`fields[].value`). Use for unassigned prefill (text, date, dropdown) before send. Unknown field ids return **400**.
 - `signingParties` (array, required) - Array of actual signers
   - `id` (string, required) - Unique signer identifier
   - `roleId` (string, recommended) - Role ID from template this signer fills
