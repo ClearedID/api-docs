@@ -536,6 +536,10 @@ Create a new document from a template by mapping roles to actual signers.
 - `sendImmediately` (boolean, optional) - When `true`, the new document is immediately queued for sending (`status: "enqueued"`). Defaults to `false` (`status: "draft"`).
 - `configuration` (object, optional) - Document send/configuration options. When `sendImmediately` is `true`, this configuration is applied and enforced at queue time (including digital signature and expiration settings). If omitted, template defaults are used.
 - `useDigitalSignature` (boolean, optional) - Same as `configuration.useDigitalSignature`. If present as a JSON boolean (`true` / `false`), it is merged into document configuration after `configuration` (so it overrides `configuration.useDigitalSignature` when both are sent).
+- `alwaysFaceAuth` (boolean, optional) - Same as `configuration.alwaysFaceAuth`. When `true`, signers must complete face authentication for this document before signing; the device face-auth **cooldown is disabled** for this document. Only applied when sent on the request (not implied when omitted).
+- `faceAuthCoolDown` (number, optional) - Same as `configuration.faceAuthCoolDown`. Overrides the default face-auth cooldown window (**minutes**) for this document. Only applied when sent on the request.
+- `configuration.alwaysFaceAuth` (boolean, optional) - See `alwaysFaceAuth` above.
+- `configuration.faceAuthCoolDown` (number, optional) - See `faceAuthCoolDown` above (minutes).
 - `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
 - `configuration.requireIdVerification` (boolean, optional) - Require ID verification
 - `configuration.useDigitalSignature` (boolean, optional) - Enable digital signature/seal flow
