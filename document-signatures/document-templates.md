@@ -538,7 +538,9 @@ Create a new document from a template by mapping roles to actual signers.
 - `useDigitalSignature` (boolean, optional) - Same as `configuration.useDigitalSignature`. If present as a JSON boolean (`true` / `false`), it is merged into document configuration after `configuration` (so it overrides `configuration.useDigitalSignature` when both are sent).
 - `alwaysFaceAuth` (boolean, optional) - Same as `configuration.alwaysFaceAuth`. When `true`, signers must complete face authentication for this document before signing; the device face-auth **cooldown is disabled** for this document. Only applied when sent on the request (not implied when omitted).
 - `faceAuthCoolDown` (number, optional) - Same as `configuration.faceAuthCoolDown`. Overrides the default face-auth cooldown window (**minutes**) for this document. Only applied when sent on the request.
+- `requireLocation` (boolean, optional) - Same as `configuration.requireLocation`. When `true`, signers must share GPS coordinates when signing; the evidence report includes IP address and resolved signing location (when geocoding succeeds). Only applied when sent on the request.
 - `configuration.alwaysFaceAuth` (boolean, optional) - See `alwaysFaceAuth` above.
+- `configuration.requireLocation` (boolean, optional) - See `requireLocation` above.
 - `configuration.faceAuthCoolDown` (number, optional) - See `faceAuthCoolDown` above (minutes).
 - `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
 - `configuration.requireIdVerification` (boolean, optional) - Require ID verification
