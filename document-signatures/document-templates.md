@@ -782,6 +782,29 @@ In templates, fields are assigned to **roles** instead of specific signers.
 }
 ```
 
+### Multi-page field placement (opt-in)
+
+By default, a field appears only on `pageNumber` (legacy behaviour). To repeat the same field at the same coordinates on other pages, set optional `pagePlacement`:
+
+```json
+{
+  "pagePlacement": {
+    "mode": "all"
+  }
+}
+```
+
+| `mode` | Behaviour |
+|--------|-----------|
+| *(omit)* or `current` | Only `pageNumber` (anchor page) |
+| `all` | Every page |
+| `from` | Anchor page and all later pages |
+| `to` | Anchor page and all earlier pages |
+| `exceptFirst` | All pages except page 1 |
+| `specific` | Pages listed in `pages` (1-based), e.g. `"pages": [1, 3, 5]` |
+
+One field `id` and one signer value apply everywhere the field is shown. Omit `pagePlacement` on existing templates — no migration required.
+
 ### Document Field (After Instantiation)
 ```json
 {
