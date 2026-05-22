@@ -350,7 +350,7 @@ console.log('Envelope sent:', sendJson.data);
 ## Webhook contracts and security
 
 ### Onboarding (IDV) webhook
-- **When**: After verification request creation (with onboarding meta) and when events are marked pending (e.g. customer approve, ops decision: identity/address/reference cleared or rejected). A batch job sends pending events to the configured URL.
+- **When**: After verification request creation (with onboarding meta), when events are marked pending (e.g. customer approve, ops decision: identity/address/reference cleared or rejected), and when the customer **confirms share** or **approves** so results are added to the organisation **`accessList`** (`${type}VerificationApproved` plus `verificationRequestApproved` on full share). Repeat intentional re-share enqueues webhooks even when usage billing is deduped. A batch job sends pending events to the configured URL.
 - **Method**: POST.
 - **Headers**: `Content-Type: application/json`. If a secret is configured: `Authorization` (or custom header) per secret format, and **`X-Webhook-Signature: sha256=<hex>`** where the HMAC-SHA256 is computed over the **raw JSON body string** (canonical) using the webhook secret.
 - **Body** (VerificationStatus style): includes `customerName`, `verifications` (array with `type`, `status`, and type-specific fields such as identity `documentType`, `clearedAt`, `expiresAt`), and **`onboarding`**: `{ pageId, onboardingPageId, urlParameters }`, plus **`eventName`** (e.g. `verificationRequestApproved`, `identityVerificationCleared`, `identityVerificationRejected`; default `verificationStatusUpdated`), **`eventContext`**, **`eventOccurredAt`** (ISO).
