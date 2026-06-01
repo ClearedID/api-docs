@@ -80,7 +80,7 @@ Templates are reusable document configurations that include:
 5. **(Optional) Identity verification** if required
 6. **Signers complete their signatures** → Status: `signed` for each signer
 7. **All signers complete** → Status: `ready_for_digital_signature`
-8. **Digital signature applied by CLEARED IDENTITY LIMITED** → Status: `completed`
+8. **Cleared certification applied** → Status: `completed`
 9. **Merchant downloads final signed PDF**
 
 ### Digital Signature Implementation
@@ -94,7 +94,7 @@ The system uses a two-phase signing approach:
 
 **Phase 2: Digital Signature Application**
 - After all signers complete, document is queued for digital signature
-- CLEARED IDENTITY LIMITED's digital certificate is applied
+- Cleared certification is applied to finalize the document
 - Creates a legally binding, tamper-evident PDF
 - Includes OCSP/CRL for long-term validation (LTV)
 
