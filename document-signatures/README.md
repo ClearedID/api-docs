@@ -49,6 +49,12 @@ Endpoints for creating and managing reusable envelope templates.
 - **Base Path**: `/api/v1/merchant/signatures/envelope-templates`
 - **Authentication**: Merchant JWT token
 
+### 5. Public Signer API
+Endpoints for public-facing signing (token-based, no merchant auth).
+
+- **Documentation**: [Public Signer API](./public-signer-api.md)
+- **Base Path**: `/api/v1/public/signatures`
+
 ## Key Concepts
 
 ### Documents
@@ -64,6 +70,21 @@ An envelope is a container for multiple related documents that are sent together
 - The same sending event
 - A unified completion status
 
+**Signer experience (2026)**:
+- **One invitation email per signer** listing all documents they must sign, with one link to the first pending document
+- **Automatic progression** through remaining envelope documents after each signature
+- **Smart link reuse** — reopening a signed document link redirects to the next unsigned document or completion
+
+### Quiet mode (`quietMode`)
+
+When `quietMode` is `true` on a document, envelope, or template configuration (or passed on send/instantiate):
+
+- **No signer-facing emails** are sent (invitations, reminders, resend, completion notifications to signers)
+- Merchant **webhooks** and **client (merchant) notifications** are unchanged
+- The API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers
+
+See [Envelopes API](./envelopes.md#10-send-envelope) and [Public Signer API](./public-signer-api.md).
+
 ### Templates
 Templates are reusable document configurations that include:
 - Pre-defined roles (instead of specific signers)
@@ -76,9 +97,9 @@ Templates are reusable document configurations that include:
 1. **Merchant creates document** → Status: `draft`
 2. **Merchant uploads PDF and configures fields**
 3. **Merchant adds signers and sends document** → Status: `enqueued`
-4. **Signers receive email with signing link**
+4. **Signers receive invitation** (email unless `quietMode`; see `invitationLinks` in API response)
 5. **(Optional) Identity verification** if required
-6. **Signers complete their signatures** → Status: `signed` for each signer
+6. **Signers complete their signatures** — for envelopes, **auto-advance** to next document
 7. **All signers complete** → Status: `ready_for_digital_signature`
 8. **Cleared certification applied** → Status: `completed`
 9. **Merchant downloads final signed PDF**
@@ -250,7 +271,16 @@ For API support, contact:
 - **Documentation**: https://docs.cleared.id
 - **Status Page**: https://status.cleared.id
 
+---
+
 ## Changelog
+
+### Version 2.1 (June 2026)
+- Envelope invitations: one email per signer with document list and single start link
+- Envelope signing: auto-advance and signed-link redirect/completion
+- `quietMode` on send/instantiate with synchronous `invitationLinks` in responses
+- Live `GET .../documents/:documentId/envelope-context` for portal signing
+- Real resend invitation email (merchant API)
 
 ### Version 2.0 (October 2025)
 - Added envelope template support

@@ -444,7 +444,7 @@ Create a new envelope with documents from an envelope template.
 
 **Endpoint**: `POST /api/v1/merchant/signatures/envelope-templates/:templateId/instantiate`
 
-**Gateway contract (current)**: Use **`title`** or **`name`** for the envelope display name, and **`documentAssignments`**: one object per document template slot with **`templateId`**, **`isIncluded`**, **`signingParties`**, and optional **`fieldValues`** (field id → string/primitive or `{ "value": <prefill>, "readOnly": true }` for that created document; published field ids only). See **`client-loan-application-workflow.md`** for a full example. Optional **`configuration`** and/or top-level **`useDigitalSignature`**, **`alwaysFaceAuth`**, **`faceAuthCoolDown`**, **`requireLocation`** may be set on the **root** body (applies to every included document) and/or on **each assignment** (overrides root for that document); values are merged into each created **`SignatureDocument.configuration`** (same override rules as document template instantiate — see **`document-templates.md`**). Optional **`sendImmediately`** (boolean): when **`true`**, the envelope is marked **sent** and each created document is **enqueued** with the same configuration merge and optional **`message`** as **`POST …/envelopes/:envelopeId/send`** (so invitations queue without a separate send call).
+**Gateway contract (current)**: Use **`title`** or **`name`** for the envelope display name, and **`documentAssignments`**: one object per document template slot with **`templateId`**, **`isIncluded`**, **`signingParties`**, and optional **`fieldValues`** (field id → string/primitive or `{ "value": <prefill>, "readOnly": true }` for that created document; published field ids only). See **`client-loan-application-workflow.md`** for a full example. Optional **`configuration`** and/or top-level **`useDigitalSignature`**, **`alwaysFaceAuth`**, **`faceAuthCoolDown`**, **`requireLocation`**, **`quietMode`** may be set on the **root** body (applies to every included document) and/or on **each assignment** (overrides root for that document); values are merged into each created **`SignatureDocument.configuration`** (same override rules as document template instantiate — see **`document-templates.md`**). Optional **`sendImmediately`** (boolean): when **`true`**, the envelope is marked **sent** and each created document is **enqueued** with the same configuration merge and optional **`message`** as **`POST …/envelopes/:envelopeId/send`** (so invitations queue without a separate send call). When **`sendImmediately`** is **`true`**, the response includes **`invitationLinks`** (one link per signer to their first pending document, plus **`documentTitles`**) unless **`quietMode`** suppresses emails.
 
 **URL Parameters**:
 - `templateId` (string, required) - Envelope template ID
@@ -570,6 +570,7 @@ Create a new envelope with documents from an envelope template.
 - Signers are applied consistently across all documents
 - Role mapping must work for all document templates
 - Created documents are automatically added to the envelope
+- With `sendImmediately: true`, response includes `quietMode` and `invitationLinks` (envelope entries include `documentTitles` and `envelopeId`)
 
 ---
 

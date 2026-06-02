@@ -156,6 +156,7 @@ Secure document signing with legal validity and tamper-proof sealing.
 | **[Envelopes](./document-signatures/envelopes.md)** | 16 endpoints for multi-document signing packages |
 | **[Document Templates](./document-signatures/document-templates.md)** | 9 endpoints for reusable document templates |
 | **[Envelope Templates](./document-signatures/envelope-templates.md)** | 7 endpoints for reusable envelope packages |
+| **[Public Signer API](./document-signatures/public-signer-api.md)** | Token-based signing load/submit (envelope auto-advance) |
 
 **Total Endpoints**: 56 endpoints
 
