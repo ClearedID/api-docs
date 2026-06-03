@@ -697,8 +697,9 @@ Upload or replace a PDF file for a template.
 - Maximum file size: 10MB
 - Accepted format: PDF only
 - Automatically generates page images
-- Updates template's `fileKey`, `totalPages`, and `pageImages`
-- Existing PDF is replaced
+- **Initial upload** (template has no published PDF yet): updates the template's `fileKey`, `totalPages`, and `pageImages` on the live template root
+- **Replace** (template already has a published PDF): stages the new `fileKey`, `totalPages`, and `pageImages` into `pendingSnapshot`; fields, roles, and overlays are preserved; **publish** required to update the live template
+- Existing PDF is replaced (staged until publish when replacing a published template)
 
 ---
 
