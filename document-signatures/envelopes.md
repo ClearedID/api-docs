@@ -512,6 +512,7 @@ Send an envelope and all its documents to signers.
       "relativeDays": 30
     }
   },
+  "quietMode": false,
   "message": "Please review and sign these onboarding documents."
 }
 ```
@@ -522,6 +523,7 @@ Send an envelope and all its documents to signers.
   - `requireIdVerification` (boolean) - Require ID verification
   - `useDigitalSignature` (boolean) - Apply digital certificate
   - `expiration` (object) - Expiration settings
+- `quietMode` (boolean, optional) - When `true`, suppress all signer-facing emails for the envelope and its documents; use `invitationLinks` in the response
 - `message` (string, optional) - Custom message for signers
 
 **Success Response** (200):
@@ -530,10 +532,21 @@ Send an envelope and all its documents to signers.
   "success": true,
   "data": {
     "envelopeId": "507f1f77bcf86cd799439040",
-    "documentsSent": 3,
-    "signerCount": 2,
-    "expiresAt": "2025-11-18T10:00:00Z",
-    "creditCost": 15
+    "status": "sent",
+    "documentCount": 3,
+    "message": "Please review and sign these onboarding documents.",
+    "quietMode": false,
+    "invitationLinks": [
+      {
+        "signerEmail": "john@example.com",
+        "signerName": "John Smith",
+        "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
+        "documentId": "507f1f77bcf86cd799439011",
+        "signerId": "507f1f77bcf86cd799439012",
+        "envelopeId": "507f1f77bcf86cd799439040",
+        "documentTitles": ["Employment Contract", "Non-Disclosure Agreement", "Employee Handbook"]
+      }
+    ]
   },
   "message": "Envelope sent successfully"
 }
@@ -578,11 +591,13 @@ Send an envelope and all its documents to signers.
 5. Checks credit balance
 6. Deducts credits
 7. Updates envelope and document statuses
-8. Queues signing invitation emails
+8. Queues signing invitation emails (one email per signer when not `quietMode`)
 
 **Notes**:
 - All documents in envelope sent simultaneously
-- Signers receive one email with links to all documents
+- **One invitation email per signer** listing all documents they must sign, with a single link to their first pending document
+- After each signature, signers **auto-advance** to the next unsigned document (see [Public Signer API](./public-signer-api.md))
+- When `quietMode` is `true`, no signer emails are sent; deliver links from `invitationLinks`
 - Configuration applied consistently across all documents
 - Status changes from `draft` to `sent`
 
@@ -824,45 +839,51 @@ Get all documents that reference a specific envelope.
 
 ### 16. Get Envelope Context for Document
 
-Get envelope context information when viewing/editing a specific document.
+Get envelope signing progress for a document and signer (portal / embedded signing).
 
 **Endpoint**: `GET /api/v1/merchant/signatures/documents/:documentId/envelope-context`
 
 **URL Parameters**:
 - `documentId` (string, required) - Document ID
 
+**Query Parameters**:
+- `signerId` (string, required) - Signer party id on the current document
+
 **Success Response** (200):
 ```json
 {
   "success": true,
   "data": {
-    "isPartOfEnvelope": true,
-    "envelopes": [
+    "hasEnvelope": true,
+    "envelopeId": "507f1f77bcf86cd799439040",
+    "documents": [
       {
-        "_id": "507f1f77bcf86cd799439040",
-        "name": "Employee Onboarding Package",
-        "status": "sent",
-        "documentCount": 3,
-        "siblingDocuments": [
-          {
-            "_id": "507f1f77bcf86cd799439012",
-            "title": "Non-Disclosure Agreement"
-          },
-          {
-            "_id": "507f1f77bcf86cd799439013",
-            "title": "Employee Handbook"
-          }
-        ]
+        "_id": "507f1f77bcf86cd799439011",
+        "title": "Employment Contract",
+        "status": "pending",
+        "isSigned": true,
+        "signerId": "507f1f77bcf86cd799439012",
+        "order": 1
+      },
+      {
+        "_id": "507f1f77bcf86cd799439012",
+        "title": "Non-Disclosure Agreement",
+        "status": "pending",
+        "isSigned": false,
+        "signerId": "507f1f77bcf86cd799439013",
+        "order": 2
       }
-    ]
+    ],
+    "currentIndex": 0,
+    "totalDocuments": 2
   }
 }
 ```
 
 **Notes**:
-- Shows which envelope(s) contain this document
-- Includes sibling documents in the same envelope
-- Used in document editor to show envelope context
+- Returns `hasEnvelope: false` with empty `documents` when the document is not in an envelope or `signerId` is missing/invalid
+- Lists sibling documents the same signer must complete, in envelope order
+- See also [Merchant Signature Documents API §24](./merchant-signature-documents.md#24-get-envelope-context)
 
 ---
 

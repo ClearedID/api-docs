@@ -125,8 +125,8 @@ Example: one signer (student) for role “Borrower”:
 
 ### Sending the document (Loan Origination System)
 - **Endpoint**: `POST /api/v1/merchant/signatures/documents/:documentId/send`
-- **Body**: `signingParties` (name, email, role, order, requireIdVerification, etc.), `configuration` (e.g. `useDigitalSignature`, `expiration`, `enforceSigningOrder`), optional `message`.
-- **Effect**: Document status becomes `enqueued`. Credits are deducted. Cleared processing later picks it up, sends **invitation emails** to signers with signing links, and sets status to `pending`.
+- **Body**: `signingParties` (name, email, role, order, requireIdVerification, etc.), `configuration` (e.g. `useDigitalSignature`, `expiration`, `enforceSigningOrder`, **`quietMode`**), optional `message`.
+- **Effect**: Document status becomes `enqueued`. Credits are deducted. Cleared processing sends invitation emails unless **`quietMode`**; response includes **`invitationLinks`** for client-owned delivery.
 
 ### Student signs and optional attachments (phase 1)
 - **Endpoint** (public): `POST /api/v1/public/signatures/documents/sign`
@@ -174,15 +174,16 @@ When a loan (or other case) requires **several** related documents signed by the
 2. **Loan Origination System** stores the **envelope template ID** for that product (parallel to storing per-document template IDs).
 3. For a given application, LOS calls **instantiate envelope template** with a display **title**, which documents are **included**, and **signing parties per included document** (names, emails, `roleId` aligned to each document template’s roles where possible).
 4. LOS calls **get envelope documents** to read created documents and their IDs (needed for the next step).
-5. LOS calls **send envelope** with an optional **message** and **per-document digital signature flags** (`documentConfigurations`). Cleared deducts credits, sets the envelope and documents to **sent** / **enqueued**, and queues invitation emails.
-6. **Student** signs each document (same public sign endpoint and webhooks as single-document flow). When all documents are complete, notifications follow the same completion rules as for individual documents.
+5. LOS calls **send envelope** with an optional **message**, optional **`quietMode`**, and **per-document digital signature flags** (`documentConfigurations`). Cleared deducts credits, sets the envelope and documents to **sent** / **enqueued**, and queues invitation emails (one per signer unless `quietMode`).
+6. **Student** signs each document in sequence (signer app auto-advances after each signature). Same public sign endpoint and webhooks as single-document flow. When all documents are complete, notifications follow the same completion rules as for individual documents.
 
 ### Instantiating an envelope from an envelope template (Loan Origination System)
 - **Endpoint**: `POST /api/v1/merchant/signatures/envelope-templates/:templateId/instantiate`
 - **Body** (gateway contract):
   - **`title`** (string, optional): Used as the envelope **name**; if omitted, the envelope template’s title is used.
   - **`configuration`** (object, optional) and/or **`useDigitalSignature`** (boolean, optional) at **root**: merged into **every** included document’s configuration (on top of each document template’s published configuration).
-  - **`sendImmediately`** (boolean, optional): when **`true`**, after documents are created the gateway marks the envelope **sent** and each document **enqueued** (same idea as **`sendImmediately`** on single-document template instantiate). Optional **`message`** is stored on each document, matching **`POST …/signatures/envelopes/:envelopeId/send`**. When **`false`** or omitted, the envelope stays **draft** until you call send separately.
+  - **`sendImmediately`** (boolean, optional): when **`true`**, after documents are created the gateway marks the envelope **sent** and each document **enqueued** (same idea as **`sendImmediately`** on single-document template instantiate). Optional **`message`** is stored on each document, matching **`POST …/signatures/envelopes/:envelopeId/send`**. When **`false`** or omitted, the envelope stays **draft** until you call send separately. Response includes **`invitationLinks`** when sent immediately (unless **`quietMode`**).
+  - **`quietMode`** (boolean, optional): on root **`configuration`** or send body — suppress Cleared signer emails; deliver links from **`invitationLinks`** via the student portal instead.
   - **`documentAssignments`** (array, required): One entry per document template in the package you want to drive.
     - **`templateId`**: ID of the **document template** slot (must match a template in the envelope template).
     - **`isIncluded`**: If `true`, a document is created from that template; at least one must be included.
@@ -233,9 +234,12 @@ Example body (borrower only; two documents included, roles must match what each 
 - **Endpoint**: `POST /api/v1/merchant/signatures/envelopes/:envelopeId/send`
 - **Body** (gateway contract):
   - **`message`** (string, optional): Shown to signers / stored on the envelope and documents.
+  - **`quietMode`** (boolean, optional): Suppress Cleared invitation/reminder/completion emails to signers; use **`invitationLinks`** in the response to notify via your portal.
   - **`documentConfigurations`** (array, optional): `{ "id": "<documentMongoId>", "useDigitalSignature": true|false }` per document in the envelope. If omitted for a document, the gateway defaults **`useDigitalSignature` to `true`** when calculating credits.
 
-Credits are summed from all documents (e.g. digital vs regular per-document), checked against the organisation balance, then deducted. All documents move to **enqueued** for outbound processing.
+Credits are summed from all documents (e.g. digital vs regular per-document), checked against the organisation balance, then deducted. All documents move to **enqueued** for outbound processing. **One invitation email per signer** lists all documents they must sign and links to the first pending document.
+
+**Response** includes **`data.invitationLinks`**: array of `{ signerEmail, signerName, signingUrl, documentId, signerId, envelopeId, documentTitles[] }`.
 
 ### Sample code (Node.js, merchant API)
 Replace `BASE_URL`, `MERCHANT_JWT`, template and signer values with your environment. Uses `fetch` and the instantiate → get → send sequence.
@@ -338,7 +342,8 @@ console.log('Envelope sent:', sendJson.data);
 
 ### Webhooks and student experience (envelope)
 - Each **document** in the envelope can still have **`webhookConfig`**; signer submissions continue to POST **`document_signed`** events per document (see [Digital signatures workflow](#digital-signatures-workflow)).
-- Signers typically receive coordinated invitations for the package; tracking at envelope level is available via `GET /api/v1/merchant/signatures/envelopes/:envelopeId` (see [Envelopes API](./document-signatures/envelopes.md)).
+- Signers receive **one coordinated invitation** per envelope (document list + single start link); after each signature the Cleared signer app **advances automatically** to the next unsigned document. See [Public Signer API](./document-signatures/public-signer-api.md).
+- Tracking at envelope level is available via `GET /api/v1/merchant/signatures/envelopes/:envelopeId` (see [Envelopes API](./document-signatures/envelopes.md)).
 
 ### Further reading
 - [Envelope templates API](./document-signatures/envelope-templates.md) — list, get, create, save, duplicate, **instantiate**, delete.
@@ -350,7 +355,7 @@ console.log('Envelope sent:', sendJson.data);
 ## Webhook contracts and security
 
 ### Onboarding (IDV) webhook
-- **When**: After verification request creation (with onboarding meta) and when events are marked pending (e.g. customer approve, ops decision: identity/address/reference cleared or rejected). A batch job sends pending events to the configured URL.
+- **When**: After verification request creation (with onboarding meta), when events are marked pending (e.g. customer approve, ops decision: identity/address/reference cleared or rejected), and when the customer **confirms share** or **approves** so results are added to the organisation **`accessList`** (`${type}VerificationApproved` plus `verificationRequestApproved` on full share). Repeat intentional re-share enqueues webhooks even when usage billing is deduped. A batch job sends pending events to the configured URL.
 - **Method**: POST.
 - **Headers**: `Content-Type: application/json`. If a secret is configured: `Authorization` (or custom header) per secret format, and **`X-Webhook-Signature: sha256=<hex>`** where the HMAC-SHA256 is computed over the **raw JSON body string** (canonical) using the webhook secret.
 - **Body** (VerificationStatus style): includes `customerName`, `verifications` (array with `type`, `status`, and type-specific fields such as identity `documentType`, `clearedAt`, `expiresAt`), and **`onboarding`**: `{ pageId, onboardingPageId, urlParameters }`, plus **`eventName`** (e.g. `verificationRequestApproved`, `identityVerificationCleared`, `identityVerificationRejected`; default `verificationStatusUpdated`), **`eventContext`**, **`eventOccurredAt`** (ISO).

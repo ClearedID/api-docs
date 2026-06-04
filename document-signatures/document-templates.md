@@ -499,6 +499,7 @@ Create a new document from a template by mapping roles to actual signers.
     "enforceSigningOrder": true,
     "requireIdVerification": false,
     "useDigitalSignature": true,
+    "quietMode": false,
     "expiration": {
       "type": "relative",
       "relativeDays": 30
@@ -536,13 +537,21 @@ Create a new document from a template by mapping roles to actual signers.
 - `sendImmediately` (boolean, optional) - When `true`, the new document is immediately queued for sending (`status: "enqueued"`). Defaults to `false` (`status: "draft"`).
 - `configuration` (object, optional) - Document send/configuration options. When `sendImmediately` is `true`, this configuration is applied and enforced at queue time (including digital signature and expiration settings). If omitted, template defaults are used.
 - `useDigitalSignature` (boolean, optional) - Same as `configuration.useDigitalSignature`. If present as a JSON boolean (`true` / `false`), it is merged into document configuration after `configuration` (so it overrides `configuration.useDigitalSignature` when both are sent).
+- `alwaysFaceAuth` (boolean, optional) - Same as `configuration.alwaysFaceAuth`. When `true`, signers must complete face authentication for this document before signing; the device face-auth **cooldown is disabled** for this document. Only applied when sent on the request (not implied when omitted).
+- `faceAuthCoolDown` (number, optional) - Same as `configuration.faceAuthCoolDown`. Overrides the default face-auth cooldown window (**minutes**) for this document. Only applied when sent on the request.
+- `requireLocation` (boolean, optional) - Same as `configuration.requireLocation`. When `true`, signers must share GPS coordinates when signing; the evidence report includes IP address and resolved signing location (when geocoding succeeds). Only applied when sent on the request.
+- `configuration.alwaysFaceAuth` (boolean, optional) - See `alwaysFaceAuth` above.
+- `configuration.requireLocation` (boolean, optional) - See `requireLocation` above.
+- `configuration.faceAuthCoolDown` (number, optional) - See `faceAuthCoolDown` above (minutes).
 - `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
 - `configuration.requireIdVerification` (boolean, optional) - Require ID verification
 - `configuration.useDigitalSignature` (boolean, optional) - Enable digital signature/seal flow
+- `configuration.quietMode` (boolean, optional) - Suppress signer-facing emails when `sendImmediately` is `true`; use `invitationLinks` in the response
 - `configuration.expiration` (object, optional) - Expiration settings
   - `type` (`none` | `fixed` | `relative`)
   - `fixedDate` (ISO date string, when `type=fixed`)
   - `relativeDays` (number, when `type=relative`)
+- `fieldValues` (object, optional) - Map of **published field id** → **string** (or other primitive) **or** `{ "value": <prefill>, "readOnly": true }`. Sets `fields[].value`; when `readOnly` is `true`, signers cannot change that value. Use for unassigned prefill (text, date, dropdown) before send. Unknown field ids return **400**.
 - `signingParties` (array, required) - Array of actual signers
   - `id` (string, required) - Unique signer identifier
   - `roleId` (string, recommended) - Role ID from template this signer fills
@@ -582,11 +591,23 @@ Create a new document from a template by mapping roles to actual signers.
           ...
         }
       ]
-    }
+    },
+    "quietMode": false,
+    "invitationLinks": [
+      {
+        "signerEmail": "john@example.com",
+        "signerName": "John Smith",
+        "signingUrl": "https://cleared.id/sign/flow?...",
+        "documentId": "507f1f77bcf86cd799439011",
+        "signerId": "507f1f77bcf86cd799439012"
+      }
+    ]
   },
   "message": "Document created from template successfully"
 }
 ```
+
+When `sendImmediately` is `false`, `invitationLinks` is omitted (document stays draft until send).
 
 **Field Mapping**:
 - Template fields with `assignedToRole: "role_1"` 
@@ -614,13 +635,14 @@ Create a new document from a template by mapping roles to actual signers.
 - Template `usageCount` is incremented
 - Template `lastUsedAt` is updated to current timestamp
 - Created document is in `draft` status by default and ready to be configured/sent
-- If `sendImmediately: true`, created document is immediately queued (`status: "enqueued"`) and `sentAt` is set
+- If `sendImmediately: true`, created document is immediately queued (`status: "enqueued"`) and `sentAt` is set; response includes `invitationLinks` (unless `quietMode`)
 - If `sendImmediately: true` and `configuration.expiration` is provided, `expiresAt` is calculated and applied during queueing
 
 **Notes**:
 - Must provide signer for each role in template
 - Role-to-signer mapping prefers `roleId`; if missing, it falls back to role-name matching using `role`/`roleName` when the match is unambiguous
 - New document inherits template configuration by default; request `configuration` can override those values at instantiate time
+- Set `configuration.quietMode: true` with `sendImmediately` to suppress Cleared invitation emails and deliver links from `invitationLinks` via your portal
 - PDF and page images are reused from template
 
 ---
@@ -774,6 +796,29 @@ In templates, fields are assigned to **roles** instead of specific signers.
   "height": 50
 }
 ```
+
+### Multi-page field placement (opt-in)
+
+By default, a field appears only on `pageNumber` (legacy behaviour). To repeat the same field at the same coordinates on other pages, set optional `pagePlacement`:
+
+```json
+{
+  "pagePlacement": {
+    "mode": "all"
+  }
+}
+```
+
+| `mode` | Behaviour |
+|--------|-----------|
+| *(omit)* or `current` | Only `pageNumber` (anchor page) |
+| `all` | Every page |
+| `from` | Anchor page and all later pages |
+| `to` | Anchor page and all earlier pages |
+| `exceptFirst` | All pages except page 1 |
+| `specific` | Pages listed in `pages` (1-based), e.g. `"pages": [1, 3, 5]` |
+
+One field `id` and one signer value apply everywhere the field is shown. Omit `pagePlacement` on existing templates — no migration required.
 
 ### Document Field (After Instantiation)
 ```json
