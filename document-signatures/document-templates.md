@@ -679,6 +679,7 @@ Upload or replace a PDF file for a template.
   "data": {
     "templateId": "507f1f77bcf86cd799439070",
     "fileKey": "signatures/templates/507f.../template.pdf",
+    "originalFilename": "Employment-Contract-v2.pdf",
     "totalPages": 3,
     "pageImages": [
       {
@@ -697,8 +698,9 @@ Upload or replace a PDF file for a template.
 - Maximum file size: 10MB
 - Accepted format: PDF only
 - Automatically generates page images
-- **Initial upload** (template has no published PDF yet): updates the template's `fileKey`, `totalPages`, and `pageImages` on the live template root
-- **Replace** (template already has a published PDF): stages the new `fileKey`, `totalPages`, and `pageImages` into `pendingSnapshot`; fields, roles, and overlays are preserved; **publish** required to update the live template
+- **`originalFilename`** — the client's original upload filename (basename only) is stored for display in the editor; the anonymised `fileKey` remains the S3 storage path
+- **Initial upload** (template has no published PDF yet): updates the template's `fileKey`, `originalFilename`, `totalPages`, and `pageImages` on the live template root
+- **Replace** (template already has a published PDF): stages the new `fileKey`, `originalFilename`, `totalPages`, and `pageImages` into `pendingSnapshot`; fields, roles, and overlays are preserved; **publish** required to update the live template
 - Existing PDF is replaced (staged until publish when replacing a published template)
 
 ---
