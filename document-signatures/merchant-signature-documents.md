@@ -526,6 +526,7 @@ Send a document to signing parties via email.
     "enforceSigningOrder": true,
     "requireIdVerification": false,
     "useDigitalSignature": true,
+    "quietMode": false,
     "expiration": {
       "type": "relative",
       "relativeDays": 30
@@ -546,6 +547,7 @@ Send a document to signing parties via email.
   - `enforceSigningOrder` (boolean) - Require sequential signing
   - `requireIdVerification` (boolean) - Require ID verification
   - `useDigitalSignature` (boolean) - Apply digital certificate after completion
+  - `quietMode` (boolean, optional) - When `true`, suppress all signer-facing emails; use `invitationLinks` in the response to deliver links yourself
   - `expiration` (object) - Expiration settings
     - `type` (string) - "none", "relative", or "fixed"
     - `relativeDays` (number) - Days until expiration (if type is "relative")
@@ -561,11 +563,23 @@ Send a document to signing parties via email.
     "title": "Employment Contract",
     "status": "enqueued",
     "signingParties": [...],
-    "expiresAt": "2025-11-18T10:00:00Z"
+    "expiresAt": "2025-11-18T10:00:00Z",
+    "quietMode": false,
+    "invitationLinks": [
+      {
+        "signerEmail": "john@example.com",
+        "signerName": "John Smith",
+        "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
+        "documentId": "507f1f77bcf86cd799439011",
+        "signerId": "507f1f77bcf86cd799439012"
+      }
+    ]
   },
   "message": "Document sent successfully"
 }
 ```
+
+**`invitationLinks`**: Returned synchronously for signers eligible for the first notification (respects signing order). Each entry includes a ready-to-use `signingUrl`. When `quietMode` is `true`, no invitation emails are sent — deliver these links via your own channel.
 
 **Credit Costs**:
 - Regular signature: 1 credit
@@ -593,8 +607,8 @@ Send a document to signing parties via email.
 
 **Notes**:
 - Document status changes from `draft` to `enqueued`
-- Signing invitation emails sent asynchronously by machine runner
-- Each signer receives unique signing token and URL
+- Signing invitation emails sent asynchronously by machine runner (skipped when `quietMode`)
+- Each signer receives unique signing token and URL (also returned in `invitationLinks`)
 - Credits deducted immediately upon sending
 - If credit charge fails, document reverts to draft status
 
@@ -762,14 +776,35 @@ Resend signing invitation email to a specific signer.
 ```json
 {
   "success": true,
-  "message": "Signing invitation resent successfully"
+  "message": "Invitation resent successfully",
+  "data": {
+    "signingLink": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
+    "signerId": "507f1f77bcf86cd799439012",
+    "documentId": "507f1f77bcf86cd799439011"
+  }
+}
+```
+
+**409 Conflict — quiet mode** (signer notifications suppressed):
+```json
+{
+  "error": true,
+  "message": "Signer notifications are suppressed (quietMode). Use invitation link below.",
+  "code": "QUIET_MODE",
+  "invitationLink": {
+    "signerEmail": "john@example.com",
+    "signerName": "John Smith",
+    "signingUrl": "https://cleared.id/sign/flow?...",
+    "documentId": "507f1f77bcf86cd799439011",
+    "signerId": "507f1f77bcf86cd799439012"
+  }
 }
 ```
 
 **Notes**:
 - Can only resend to signers with `pending` status
+- Sends invitation email immediately (unless `quietMode`)
 - Generates new signing token
-- Queues email for sending
 
 ---
 
@@ -798,10 +833,20 @@ Send a reminder email to a signer who hasn't completed signing.
 }
 ```
 
+**409 Conflict — quiet mode**:
+```json
+{
+  "error": true,
+  "message": "Signer notifications are suppressed (quietMode). Use invitation links from the send response.",
+  "code": "QUIET_MODE"
+}
+```
+
 **Notes**:
 - Custom message included in reminder email
 - Reminder action logged in audit trail
 - Can only remind pending signers
+- Reminders are not sent when `quietMode` is enabled
 
 ---
 
@@ -1032,31 +1077,62 @@ Allows merchant to sign a document directly on behalf of a signer (for in-person
 
 ### 24. Get Envelope Context
 
-Get envelope information for a document (if document is part of an envelope).
+Get envelope signing progress for a document and signer (used by portal in-person / embedded signing).
 
 **Endpoint**: `GET /api/v1/merchant/signatures/documents/:documentId/envelope-context`
 
 **URL Parameters**:
 - `documentId` (string, required) - Document ID
 
-**Success Response** (200):
+**Query Parameters**:
+- `signerId` (string, required) - Signer party id on the current document (`signingParties[]._id` or `id`)
+
+**Success Response** (200) — document not in an envelope:
 ```json
 {
   "success": true,
   "data": {
-    "isPartOfEnvelope": true,
-    "envelopes": [
-      {
-        "_id": "507f1f77bcf86cd799439040",
-        "name": "Employee Onboarding Package",
-        "status": "sent",
-        "documentCount": 3,
-        "createdAt": "2025-10-15T09:00:00Z"
-      }
-    ]
+    "hasEnvelope": false,
+    "documents": []
   }
 }
 ```
+
+**Success Response** (200) — envelope context:
+```json
+{
+  "success": true,
+  "data": {
+    "hasEnvelope": true,
+    "envelopeId": "507f1f77bcf86cd799439040",
+    "documents": [
+      {
+        "_id": "507f1f77bcf86cd799439011",
+        "title": "Employment Contract",
+        "status": "pending",
+        "isSigned": true,
+        "signerId": "507f1f77bcf86cd799439012",
+        "order": 1
+      },
+      {
+        "_id": "507f1f77bcf86cd799439013",
+        "title": "Non-Disclosure Agreement",
+        "status": "pending",
+        "isSigned": false,
+        "signerId": "507f1f77bcf86cd799439014",
+        "order": 2
+      }
+    ],
+    "currentIndex": 0,
+    "totalDocuments": 2
+  }
+}
+```
+
+**Notes**:
+- Lists only documents in the envelope that the same signer (matched by `userId` or email) must sign
+- `currentIndex` is the position of `:documentId` in that list
+- Used by the portal to show envelope progress during signing
 
 ---
 
