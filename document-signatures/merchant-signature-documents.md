@@ -526,7 +526,11 @@ Send a document to signing parties via email.
     "enforceSigningOrder": true,
     "requireIdVerification": false,
     "useDigitalSignature": true,
-    "quietMode": false,
+    "notifications": {
+      "mute": false,
+      "invitations": true,
+      "signingUpdates": true
+    },
     "expiration": {
       "type": "relative",
       "relativeDays": 30
@@ -547,7 +551,7 @@ Send a document to signing parties via email.
   - `enforceSigningOrder` (boolean) - Require sequential signing
   - `requireIdVerification` (boolean) - Require ID verification
   - `useDigitalSignature` (boolean) - Apply digital certificate after completion
-  - `quietMode` (boolean, optional) - When `true`, suppress all signer-facing emails; use `invitationLinks` in the response to deliver links yourself
+  - `notifications` (object, optional) - Signer-facing notification controls (`mute`, `invitations`, `signingUpdates`); when `mute` or `invitations` suppresses emails, use `invitationLinks` in the response. See [Signing notification controls](./signing-notifications.md).
   - `expiration` (object) - Expiration settings
     - `type` (string) - "none", "relative", or "fixed"
     - `relativeDays` (number) - Days until expiration (if type is "relative")
@@ -564,7 +568,8 @@ Send a document to signing parties via email.
     "status": "enqueued",
     "signingParties": [...],
     "expiresAt": "2025-11-18T10:00:00Z",
-    "quietMode": false,
+    "notificationsMuted": false,
+    "notifications": { "mute": false, "invitations": true, "signingUpdates": true },
     "invitationLinks": [
       {
         "signerEmail": "john@example.com",
@@ -579,7 +584,7 @@ Send a document to signing parties via email.
 }
 ```
 
-**`invitationLinks`**: Returned synchronously for signers eligible for the first notification (respects signing order). Each entry includes a ready-to-use `signingUrl`. When `quietMode` is `true`, no invitation emails are sent — deliver these links via your own channel.
+**`invitationLinks`**: Returned synchronously for signers eligible for the first notification (respects signing order). Each entry includes a ready-to-use `signingUrl`. When invitation notifications are suppressed (`notifications.mute` or `notifications.invitations: false`), no invitation emails are sent — deliver these links via your own channel.
 
 **Credit Costs**:
 - Regular signature: 1 credit
@@ -607,7 +612,7 @@ Send a document to signing parties via email.
 
 **Notes**:
 - Document status changes from `draft` to `enqueued`
-- Signing invitation emails sent asynchronously by machine runner (skipped when `quietMode`)
+- Signing invitation emails sent asynchronously by machine runner (skipped when invitation notifications are suppressed)
 - Each signer receives unique signing token and URL (also returned in `invitationLinks`)
 - Credits deducted immediately upon sending
 - If credit charge fails, document reverts to draft status
@@ -785,12 +790,12 @@ Resend signing invitation email to a specific signer.
 }
 ```
 
-**409 Conflict — quiet mode** (signer notifications suppressed):
+**409 Conflict — notifications muted** (signer invitation notifications suppressed):
 ```json
 {
   "error": true,
-  "message": "Signer notifications are suppressed (quietMode). Use invitation link below.",
-  "code": "QUIET_MODE",
+  "message": "Signer invitation notifications are suppressed. Use invitation link below.",
+  "code": "NOTIFICATIONS_MUTED",
   "invitationLink": {
     "signerEmail": "john@example.com",
     "signerName": "John Smith",
@@ -803,7 +808,7 @@ Resend signing invitation email to a specific signer.
 
 **Notes**:
 - Can only resend to signers with `pending` status
-- Sends invitation email immediately (unless `quietMode`)
+- Sends invitation email immediately (unless invitation notifications are suppressed)
 - Generates new signing token
 
 ---
@@ -833,12 +838,12 @@ Send a reminder email to a signer who hasn't completed signing.
 }
 ```
 
-**409 Conflict — quiet mode**:
+**409 Conflict — notifications muted**:
 ```json
 {
   "error": true,
-  "message": "Signer notifications are suppressed (quietMode). Use invitation links from the send response.",
-  "code": "QUIET_MODE"
+  "message": "Signer signing update notifications are suppressed.",
+  "code": "NOTIFICATIONS_MUTED"
 }
 ```
 
@@ -846,7 +851,7 @@ Send a reminder email to a signer who hasn't completed signing.
 - Custom message included in reminder email
 - Reminder action logged in audit trail
 - Can only remind pending signers
-- Reminders are not sent when `quietMode` is enabled
+- Reminders are not sent when signing update notifications are suppressed (`notifications.mute` or `notifications.signingUpdates: false`)
 
 ---
 
@@ -1269,8 +1274,9 @@ When creating or updating document fields, the following types are supported:
       "relativeDays": 30
     },
     "notifications": {
-      "sendReminders": true,
-      "reminderDays": [7, 3, 1]
+      "mute": false,
+      "invitations": true,
+      "signingUpdates": true
     }
   }
 }
@@ -1283,7 +1289,7 @@ When creating or updating document fields, the following types are supported:
 - `allowComments` (boolean) - Allow signers to add comments
 - `allowDecline` (boolean) - Allow signers to decline signing
 - `expiration` (object) - Document expiration settings
-- `notifications` (object) - Notification settings
+- `notifications` (object) - Signer-facing email controls: `mute`, `invitations`, `signingUpdates` — see [Signing notification controls](./signing-notifications.md)
 
 ## Common Use Cases
 

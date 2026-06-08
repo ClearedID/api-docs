@@ -75,13 +75,31 @@ An envelope is a container for multiple related documents that are sent together
 - **Automatic progression** through remaining envelope documents after each signature
 - **Smart link reuse** — reopening a signed document link redirects to the next unsigned document or completion
 
-### Quiet mode (`quietMode`)
+### Notification controls (`notifications`)
 
-When `quietMode` is `true` on a document, envelope, or template configuration (or passed on send/instantiate):
+Control signer-facing emails with a `notifications` object on create/instantiate/send payloads and on template defaults:
 
-- **No signer-facing emails** are sent (invitations, reminders, resend, completion notifications to signers)
-- Merchant **webhooks** and **client (merchant) notifications** are unchanged
-- The API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers
+```json
+{
+  "notifications": {
+    "mute": true,
+    "invitations": true,
+    "signingUpdates": true
+  }
+}
+```
+
+- **`mute: true`** — suppress all signer-facing signing notifications (invitations, reminders, completion emails to signers)
+- **`invitations: false`** — suppress invitation and resend invitation emails only
+- **`signingUpdates: false`** — suppress reminders and signer-facing completion/update emails
+
+Request-level settings apply globally; signer-role-level `notifications` on each `signingParty` can further suppress when the request does not already suppress that category. Request-level suppression cannot be overridden by signer-level settings.
+
+When notifications are muted or invitations suppressed, the API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers. Merchant **webhooks** and **client (merchant) notifications** are unchanged.
+
+Legacy stored `configuration.quietMode: true` is treated as `notifications.mute: true` when evaluating sends.
+
+**Full reference**: [Signing notification controls](./signing-notifications.md)
 
 See [Envelopes API](./envelopes.md#10-send-envelope) and [Public Signer API](./public-signer-api.md).
 
@@ -97,7 +115,7 @@ Templates are reusable document configurations that include:
 1. **Merchant creates document** → Status: `draft`
 2. **Merchant uploads PDF and configures fields**
 3. **Merchant adds signers and sends document** → Status: `enqueued`
-4. **Signers receive invitation** (email unless `quietMode`; see `invitationLinks` in API response)
+4. **Signers receive invitation** (email unless muted/suppressed; see `invitationLinks` in API response)
 5. **(Optional) Identity verification** if required
 6. **Signers complete their signatures** — for envelopes, **auto-advance** to next document
 7. **All signers complete** → Status: `ready_for_digital_signature`
@@ -276,9 +294,10 @@ For API support, contact:
 ## Changelog
 
 ### Version 2.1 (June 2026)
+- **Signing notification controls** — `notifications` (`mute`, `invitations`, `signingUpdates`) on templates, instantiate, send, envelope send, and per-signer; see [signing-notifications.md](./signing-notifications.md)
 - Envelope invitations: one email per signer with document list and single start link
 - Envelope signing: auto-advance and signed-link redirect/completion
-- `quietMode` on send/instantiate with synchronous `invitationLinks` in responses
+- `notifications` / `configuration.notifications` on send/instantiate with synchronous `invitationLinks` in responses
 - Live `GET .../documents/:documentId/envelope-context` for portal signing
 - Real resend invitation email (merchant API)
 

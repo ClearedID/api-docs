@@ -499,7 +499,11 @@ Create a new document from a template by mapping roles to actual signers.
     "enforceSigningOrder": true,
     "requireIdVerification": false,
     "useDigitalSignature": true,
-    "quietMode": false,
+    "notifications": {
+      "mute": false,
+      "invitations": true,
+      "signingUpdates": true
+    },
     "expiration": {
       "type": "relative",
       "relativeDays": 30
@@ -546,7 +550,7 @@ Create a new document from a template by mapping roles to actual signers.
 - `configuration.enforceSigningOrder` (boolean, optional) - Enforce signing order
 - `configuration.requireIdVerification` (boolean, optional) - Require ID verification
 - `configuration.useDigitalSignature` (boolean, optional) - Enable digital signature/seal flow
-- `configuration.quietMode` (boolean, optional) - Suppress signer-facing emails when `sendImmediately` is `true`; use `invitationLinks` in the response
+- `configuration.notifications` or top-level `notifications` (object, optional) - Signer-facing notification controls (`mute`, `invitations`, `signingUpdates`); when invitations are suppressed and `sendImmediately` is `true`, use `invitationLinks` in the response. See [Signing notification controls](./signing-notifications.md).
 - `configuration.expiration` (object, optional) - Expiration settings
   - `type` (`none` | `fixed` | `relative`)
   - `fixedDate` (ISO date string, when `type=fixed`)
@@ -563,6 +567,7 @@ Create a new document from a template by mapping roles to actual signers.
   - `order` (number, required) - Signing order
   - `enforceOrder` (boolean, optional) - Enforce signing order
   - `requireIdVerification` (boolean, optional) - Require ID verification
+  - `notifications` (object, optional) - Per-signer overrides (`mute`, `invitations`, `signingUpdates`); cannot re-enable what the request suppressed — see [Signing notification controls](./signing-notifications.md)
 
 **Success Response** (200):
 ```json
@@ -592,7 +597,12 @@ Create a new document from a template by mapping roles to actual signers.
         }
       ]
     },
-    "quietMode": false,
+    "notificationsMuted": false,
+    "notifications": {
+      "mute": false,
+      "invitations": true,
+      "signingUpdates": true
+    },
     "invitationLinks": [
       {
         "signerEmail": "john@example.com",
@@ -635,14 +645,14 @@ When `sendImmediately` is `false`, `invitationLinks` is omitted (document stays 
 - Template `usageCount` is incremented
 - Template `lastUsedAt` is updated to current timestamp
 - Created document is in `draft` status by default and ready to be configured/sent
-- If `sendImmediately: true`, created document is immediately queued (`status: "enqueued"`) and `sentAt` is set; response includes `invitationLinks` (unless `quietMode`)
+- If `sendImmediately: true`, created document is immediately queued (`status: "enqueued"`) and `sentAt` is set; response includes `invitationLinks` (unless invitation notifications are suppressed)
 - If `sendImmediately: true` and `configuration.expiration` is provided, `expiresAt` is calculated and applied during queueing
 
 **Notes**:
 - Must provide signer for each role in template
 - Role-to-signer mapping prefers `roleId`; if missing, it falls back to role-name matching using `role`/`roleName` when the match is unambiguous
 - New document inherits template configuration by default; request `configuration` can override those values at instantiate time
-- Set `configuration.quietMode: true` with `sendImmediately` to suppress Cleared invitation emails and deliver links from `invitationLinks` via your portal
+- Set `notifications.mute: true` or `notifications.invitations: false` with `sendImmediately` to suppress Cleared invitation emails and deliver links from `invitationLinks` via your portal
 - PDF and page images are reused from template
 
 ---
