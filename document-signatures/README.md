@@ -82,16 +82,25 @@ Control signer-facing emails with a `notifications` object on create/instantiate
 ```json
 {
   "notifications": {
-    "mute": true,
-    "invitations": true,
-    "signingUpdates": true
+    "mute": true
   }
 }
 ```
 
-- **`mute: true`** — suppress all signer-facing signing notifications (invitations, reminders, completion emails to signers)
-- **`invitations: false`** — suppress invitation and resend invitation emails only
-- **`signingUpdates: false`** — suppress reminders and signer-facing completion/update emails
+Granular:
+
+```json
+{
+  "notifications": {
+    "invitations": "mute",
+    "signingUpdates": null
+  }
+}
+```
+
+- **`mute: true`** — suppress all signer-facing signing notifications
+- **`invitations: "mute"`** — suppress invitation emails; `null` = enabled
+- **`signingUpdates: "mute"`** — suppress reminders and signer completion emails; `null` = enabled
 
 Request-level settings apply globally; signer-role-level `notifications` on each `signingParty` can further suppress when the request does not already suppress that category. Request-level suppression cannot be overridden by signer-level settings.
 

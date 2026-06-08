@@ -6,32 +6,45 @@ Merchant **webhooks**, **client (merchant) push**, and **client completion email
 
 ## `notifications` object
 
+**Mute everything:**
+
 ```json
 {
   "notifications": {
-    "mute": false,
-    "invitations": true,
-    "signingUpdates": true
+    "mute": true
   }
 }
 ```
 
-| Field | Type | Effect when `false` / when `mute: true` |
-|-------|------|----------------------------------------|
-| `mute` | boolean | Suppresses **all** signer-facing signing notifications (invitations, resends, reminders, signer completion emails). |
-| `invitations` | boolean | Suppresses **invitation** and **resend invitation** emails only. |
-| `signingUpdates` | boolean | Suppresses **reminders** and **signer-facing completion/update** emails only. |
+**Granular (mute one category only):**
 
-Omitted fields behave as **enabled** (notifications sent as today).
+```json
+{
+  "notifications": {
+    "invitations": "mute",
+    "signingUpdates": null
+  }
+}
+```
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `mute` | `true` only | Suppresses **all** signer-facing signing notifications (invitations, resends, reminders, signer completion emails). |
+| `invitations` | `"mute"` \| `null` | `"mute"` suppresses invitation and resend invitation emails; `null` leaves invitations enabled. |
+| `signingUpdates` | `"mute"` \| `null` | `"mute"` suppresses reminders and signer-facing completion/update emails; `null` leaves them enabled. |
+
+Omitted granular keys behave as **enabled** (same as `null`).
+
+**Legacy:** boolean `false` / `true` on `invitations` and `signingUpdates` is still accepted (`false` → `"mute"`, `true` → `null`).
 
 ### Validation
 
-Each field must be a boolean when present. Invalid shapes return **400**:
+Invalid shapes return **400**:
 
 ```json
 {
   "error": true,
-  "message": "notifications must be an object with optional boolean fields: mute, invitations, signingUpdates"
+  "message": "Invalid notifications configuration. mute must be true when set; invitations and signingUpdates must be \"mute\", null, or a legacy boolean."
 }
 ```
 
@@ -50,14 +63,14 @@ Legacy **`configuration.quietMode: true`** (read-only) is treated as **`notifica
 ## Precedence
 
 1. **Request `mute: true`** — nothing signer-facing is sent; signer-level settings cannot re-enable.
-2. **Request `invitations: false`** or **`signingUpdates: false`** — that category is off for the whole request; signers cannot override back to `true`.
+2. **Request `invitations: "mute"`** or **`signingUpdates: "mute"`** — that category is off for the whole request; signers cannot override back to `null`.
 3. **Signer-level `notifications`** — applies only when the request does not already suppress that category (signer can suppress further, not enable what the request disabled).
 
 Envelope configuration is merged with document configuration when resolving effective settings for a document in an envelope.
 
 ## `invitationLinks` in responses
 
-When invitations are suppressed (`mute` or `invitations: false`), Cleared does **not** email signers. The API returns **`invitationLinks`** synchronously on:
+When invitations are suppressed (`mute: true` or `invitations: "mute"`), Cleared does **not** email signers. The API returns **`invitationLinks`** synchronously on:
 
 - Document send — `POST …/documents/:documentId/send`
 - Template instantiate with `sendImmediately: true` — `POST …/templates/:templateId/instantiate`
@@ -84,6 +97,19 @@ Example fragment:
       "signerId": "507f1f77bcf86cd799439012"
     }
   ]
+}
+```
+
+Granular example response:
+
+```json
+{
+  "notificationsMuted": false,
+  "notifications": {
+    "invitations": "mute",
+    "signingUpdates": null
+  },
+  "invitationLinks": [ ... ]
 }
 ```
 
@@ -128,23 +154,19 @@ Use **`invitationLinks`** from the original send/instantiate response, or call s
   "signingParties": [
     { "name": "Jane Smith", "email": "jane@example.com", "order": 1 }
   ],
-  "configuration": {
-    "useDigitalSignature": true
-  },
   "notifications": {
     "mute": true
-  },
-  "message": "Please sign via the link we sent you."
+  }
 }
 ```
 
-### Invitations off, reminders on
+### Invitations muted, reminders still sent
 
 ```json
 {
   "notifications": {
-    "invitations": false,
-    "signingUpdates": true
+    "invitations": "mute",
+    "signingUpdates": null
   }
 }
 ```
@@ -153,13 +175,13 @@ Use **`invitationLinks`** from the original send/instantiate response, or call s
 
 ```json
 {
-  "notifications": { "invitations": true },
+  "notifications": { "invitations": null, "signingUpdates": null },
   "signingParties": [
     {
       "name": "Partner A",
       "email": "a@company.com",
       "order": 1,
-      "notifications": { "invitations": false }
+      "notifications": { "invitations": "mute", "signingUpdates": null }
     },
     {
       "name": "Partner B",
@@ -169,30 +191,6 @@ Use **`invitationLinks`** from the original send/instantiate response, or call s
   ]
 }
 ```
-
-### Template default + override at instantiate
-
-Template saved with:
-
-```json
-{
-  "configuration": {
-    "notifications": { "invitations": true, "signingUpdates": true }
-  }
-}
-```
-
-Instantiate with request override:
-
-```json
-{
-  "notifications": { "mute": true },
-  "sendImmediately": true,
-  "signingParties": [ ... ]
-}
-```
-
-Request `mute` wins; response includes `invitationLinks` and `notificationsMuted: true`.
 
 ## Related endpoints
 
