@@ -78,7 +78,13 @@ When invitations are suppressed (`mute: true` or `invitations: "mute"`), Cleared
 - Envelope send — `POST …/envelopes/:envelopeId/send`
 - Batch instantiate when `sendImmediately: true` (per successful row, same as single instantiate)
 
-Each link entry includes a ready-to-use **`signingUrl`**, plus `signerEmail`, `signerName`, `documentId`, `signerId` (and for envelopes: `envelopeId`, `documentTitles` where applicable).
+Each link entry includes a ready-to-use **`signingUrl`**, plus `signerEmail`, `signerName`, `documentId`, `signerId` (and for envelopes: `envelopeId`, `documentTitles`, and **`documents[]`** listing every pending document for that signer).
+
+For **envelopes**, `documents[]` includes all documents the signer must sign. Only the first actionable document in signing order has a non-null `signingUrl` on that row; later documents have `signingUrl: null` until prior documents are completed. The top-level **`signingUrl`** always points to the first actionable document.
+
+On-demand link for a single signer on a sent document:
+
+- `POST …/documents/:documentId/signers/:signerId/invitation-link` — returns `{ signingUrl, signerId, signerEmail, signerName, documentId }`
 
 Deliver these URLs via your own channel (portal, WhatsApp, SMS, etc.).
 
@@ -94,22 +100,58 @@ Example fragment:
       "signerName": "John Smith",
       "signingUrl": "https://cleared.id/sign/flow?documentId=...&signerId=...&token=...",
       "documentId": "507f1f77bcf86cd799439011",
-      "signerId": "507f1f77bcf86cd799439012"
+      "signerId": "507f1f77bcf86cd799439012",
+      "envelopeId": "507f1f77bcf86cd799439099",
+      "documentTitles": ["Loan Agreement", "Disclosure"],
+      "documents": [
+        {
+          "documentId": "507f1f77bcf86cd799439011",
+          "title": "Loan Agreement",
+          "signerId": "507f1f77bcf86cd799439012",
+          "signingUrl": "https://cleared.id/sign/flow?...",
+          "status": "pending",
+          "order": 1
+        },
+        {
+          "documentId": "507f1f77bcf86cd799439013",
+          "title": "Disclosure",
+          "signerId": "507f1f77bcf86cd799439014",
+          "signingUrl": null,
+          "status": "pending",
+          "order": 2
+        }
+      ]
     }
   ]
 }
 ```
 
-Granular example response:
+## Webhook events
+
+Subscribe on document webhook bindings to receive per-signer invitation events:
+
+| Event | When |
+|-------|------|
+| `signature_invitation_created` | A signing URL is materialized for an eligible signer (API send/instantiate, or machine-runner when email is skipped because invitations are muted). |
+| `signature_invitation_sent` | Cleared successfully sends the invitation email to the signer. |
+
+Payload includes `signingUrl`, `signerEmail`, `signerName`, `signerId`, `documentId`, optional `envelopeId`, `documentTitles`, `documents[]`, `deliveryChannel` (`link` or `email`), and `occurredAt`.
+
+Example fragment (envelope):
 
 ```json
 {
-  "notificationsMuted": false,
-  "notifications": {
-    "invitations": "mute",
-    "signingUpdates": null
-  },
-  "invitationLinks": [ ... ]
+  "event": "signature_invitation_created",
+  "documentId": "507f1f77bcf86cd799439011",
+  "signerId": "507f1f77bcf86cd799439012",
+  "signerEmail": "john@example.com",
+  "signerName": "John Smith",
+  "signingUrl": "https://cleared.id/sign/flow?...",
+  "envelopeId": "507f1f77bcf86cd799439099",
+  "documentTitles": ["Loan Agreement", "Disclosure"],
+  "documents": [ ... ],
+  "deliveryChannel": "link",
+  "occurredAt": "2026-06-08T12:00:00.000Z"
 }
 ```
 
