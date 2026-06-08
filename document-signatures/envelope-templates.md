@@ -570,7 +570,7 @@ Create a new envelope with documents from an envelope template.
 - Signers are applied consistently across all documents
 - Role mapping must work for all document templates
 - Created documents are automatically added to the envelope
-- With `sendImmediately: true`, response includes `notificationsMuted`, `notifications`, and `invitationLinks` (envelope entries include `documentTitles` and `envelopeId`)
+- With `sendImmediately: true`, each item in **`data.documents[]`** includes `notifications`, `notificationsMuted`, `signingParties` (with signer `notifications` when set), and **`invitationLinks`** (same shape as standalone document instantiate). Envelope-global config is at **`data.envelope.notifications`**. There is no root-level `invitationLinks` array.
 
 ---
 

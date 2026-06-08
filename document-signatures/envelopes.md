@@ -540,22 +540,38 @@ Send an envelope and all its documents to signers.
     "documentCount": 3,
     "message": "Please review and sign these onboarding documents.",
     "notificationsMuted": false,
-    "notifications": { "mute": false, "invitations": true, "signingUpdates": true },
-    "invitationLinks": [
+    "notifications": { "invitations": null, "signingUpdates": null },
+    "documents": [
       {
-        "signerEmail": "john@example.com",
-        "signerName": "John Smith",
-        "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
-        "documentId": "507f1f77bcf86cd799439011",
-        "signerId": "507f1f77bcf86cd799439012",
-        "envelopeId": "507f1f77bcf86cd799439040",
-        "documentTitles": ["Employment Contract", "Non-Disclosure Agreement", "Employee Handbook"]
+        "_id": "507f1f77bcf86cd799439011",
+        "title": "Employment Contract",
+        "status": "enqueued",
+        "notifications": { "mute": true },
+        "notificationsMuted": true,
+        "invitationLinks": [
+          {
+            "signerEmail": "john@example.com",
+            "signerName": "John Smith",
+            "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
+            "documentId": "507f1f77bcf86cd799439011",
+            "signerId": "507f1f77bcf86cd799439012"
+          }
+        ],
+        "signingParties": [
+          {
+            "name": "John Smith",
+            "email": "john@example.com",
+            "status": "pending"
+          }
+        ]
       }
     ]
   },
   "message": "Envelope sent successfully"
 }
 ```
+
+Top-level **`notifications`** is envelope-global config only. Per-document effective settings and **`invitationLinks`** are on each **`documents[]`** row (same shape as standalone document send). There is no root-level **`invitationLinks`** array.
 
 **Error Responses**:
 

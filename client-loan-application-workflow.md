@@ -239,7 +239,7 @@ Example body (borrower only; two documents included, roles must match what each 
 
 Credits are summed from all documents (e.g. digital vs regular per-document), checked against the organisation balance, then deducted. All documents move to **enqueued** for outbound processing. **One invitation email per signer** lists all documents they must sign and links to the first pending document.
 
-**Response** includes **`data.invitationLinks`**: array of `{ signerEmail, signerName, signingUrl, documentId, signerId, envelopeId, documentTitles[] }`.
+**Response** includes **`data.documents[].invitationLinks`** per document (same shape as standalone document send: `{ signerEmail, signerName, signingUrl, documentId, signerId }`). Envelope-global notifications are at **`data.envelope.notifications`** (instantiate) or **`data.notifications`** (send).
 
 ### Sample code (Node.js, merchant API)
 Replace `BASE_URL`, `MERCHANT_JWT`, template and signer values with your environment. Uses `fetch` and the instantiate → get → send sequence.

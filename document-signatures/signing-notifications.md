@@ -66,21 +66,31 @@ Legacy **`configuration.quietMode: true`** (read-only) is treated as **`notifica
 2. **Request `invitations: "mute"`** or **`signingUpdates: "mute"`** — that category is off for the whole request; signers cannot override back to `null`.
 3. **Signer-level `notifications`** — applies only when the request does not already suppress that category (signer can suppress further, not enable what the request disabled).
 
-Envelope configuration is merged with document configuration when resolving effective settings for a document in an envelope.
+Envelope configuration is merged with document configuration when resolving effective settings for a document in an envelope. **Document overrides envelope**; **signer `signingParties[].notifications` overrides further** when the request has not already suppressed that category.
+
+### Notification fields in envelope responses
+
+| Location | Meaning |
+|----------|---------|
+| `data.envelope.notifications` (instantiate) or `data.notifications` (send) | Envelope-global config only |
+| `data.documents[].notifications` | Effective request-level for that document (envelope + document merged; document wins) |
+| `data.documents[].configuration.notifications` | Document-stored override |
+| `data.documents[].signingParties[].notifications` | Signer-level override |
+| `data.documents[].notificationsMuted` | `true` when any pending signer on that document would skip invitation emails |
+
+Standalone document send/instantiate responses use the same per-document fields at `data` root (`notifications`, `notificationsMuted`, `invitationLinks`).
 
 ## `invitationLinks` in responses
 
 When invitations are suppressed (`mute: true` or `invitations: "mute"`), Cleared does **not** email signers. The API returns **`invitationLinks`** synchronously on:
 
-- Document send — `POST …/documents/:documentId/send`
-- Template instantiate with `sendImmediately: true` — `POST …/templates/:templateId/instantiate`
-- Envelope template instantiate with `sendImmediately: true`
-- Envelope send — `POST …/envelopes/:envelopeId/send`
+- Document send — `POST …/documents/:documentId/send` — at **`data.invitationLinks`**
+- Template instantiate with `sendImmediately: true` — at **`data.invitationLinks`**
+- Envelope template instantiate with `sendImmediately: true` — at **`data.documents[].invitationLinks`** (one array per document; same shape as standalone)
+- Envelope send — `POST …/envelopes/:envelopeId/send` — at **`data.documents[].invitationLinks`**
 - Batch instantiate when `sendImmediately: true` (per successful row, same as single instantiate)
 
-Each link entry includes a ready-to-use **`signingUrl`**, plus `signerEmail`, `signerName`, `documentId`, `signerId` (and for envelopes: `envelopeId`, `documentTitles`, and **`documents[]`** listing every pending document for that signer).
-
-For **envelopes**, `documents[]` includes all documents the signer must sign. Only the first actionable document in signing order has a non-null `signingUrl` on that row; later documents have `signingUrl: null` until prior documents are completed. The top-level **`signingUrl`** always points to the first actionable document.
+Each link entry includes a ready-to-use **`signingUrl`**, plus `signerEmail`, `signerName`, `documentId`, and `signerId`. **Envelope API responses do not return a root-level `invitationLinks` array** — use each document row instead (parity with standalone document responses).
 
 On-demand link for a single signer on a sent document:
 
@@ -88,7 +98,7 @@ On-demand link for a single signer on a sent document:
 
 Deliver these URLs via your own channel (portal, WhatsApp, SMS, etc.).
 
-Example fragment:
+Example fragment (standalone document):
 
 ```json
 {
@@ -100,25 +110,41 @@ Example fragment:
       "signerName": "John Smith",
       "signingUrl": "https://cleared.id/sign/flow?documentId=...&signerId=...&token=...",
       "documentId": "507f1f77bcf86cd799439011",
-      "signerId": "507f1f77bcf86cd799439012",
-      "envelopeId": "507f1f77bcf86cd799439099",
-      "documentTitles": ["Loan Agreement", "Disclosure"],
-      "documents": [
+      "signerId": "507f1f77bcf86cd799439012"
+    }
+  ]
+}
+```
+
+Example fragment (envelope send — per document):
+
+```json
+{
+  "envelopeId": "507f1f77bcf86cd799439040",
+  "status": "sent",
+  "documentCount": 2,
+  "notifications": { "mute": true },
+  "documents": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "title": "Loan Agreement",
+      "status": "enqueued",
+      "notifications": { "mute": true },
+      "notificationsMuted": true,
+      "invitationLinks": [
         {
-          "documentId": "507f1f77bcf86cd799439011",
-          "title": "Loan Agreement",
-          "signerId": "507f1f77bcf86cd799439012",
+          "signerEmail": "john@example.com",
+          "signerName": "John Smith",
           "signingUrl": "https://cleared.id/sign/flow?...",
-          "status": "pending",
-          "order": 1
-        },
+          "documentId": "507f1f77bcf86cd799439011",
+          "signerId": "507f1f77bcf86cd799439012"
+        }
+      ],
+      "signingParties": [
         {
-          "documentId": "507f1f77bcf86cd799439013",
-          "title": "Disclosure",
-          "signerId": "507f1f77bcf86cd799439014",
-          "signingUrl": null,
-          "status": "pending",
-          "order": 2
+          "name": "John Smith",
+          "email": "john@example.com",
+          "status": "pending"
         }
       ]
     }
