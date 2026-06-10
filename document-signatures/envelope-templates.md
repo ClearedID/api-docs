@@ -471,7 +471,7 @@ Create a new envelope with documents from an envelope template.
       "order": 2
     }
   ],
-  "customConfiguration": {
+  "configuration": {
     "expiration": {
       "type": "fixed",
       "fixedDate": "2025-11-30"
@@ -489,7 +489,8 @@ Create a new envelope with documents from an envelope template.
   - `email` (string, required) - Signer's email
   - `role` (string, optional) - Signer's role/title
   - `order` (number, required) - Signing order
-- `customConfiguration` (object, optional) - Override template configuration
+- `configuration` (object, optional) - Override template configuration, applied to every created document (per-assignment overrides go on each `documentAssignments[]` entry)
+- `configuration.expiration` (object, **optional**) - Expiration settings. Expiration is never required; when omitted, each document template's default applies. If provided (or inherited) it must be well-formed, otherwise the request fails with **400**: `type` must be `none` | `fixed` | `relative`; `fixedDate` must be a valid date when `type=fixed`; `relativeDays` must be a positive number when `type=relative`
 
 **Success Response** (200):
 ```json
@@ -551,6 +552,14 @@ Create a new envelope with documents from an envelope template.
 }
 ```
 
+400 Bad Request - Malformed expiration (only when an expiration object is provided or inherited):
+```json
+{
+  "error": true,
+  "message": "configuration.expiration.fixedDate is required when expiration type is \"fixed\""
+}
+```
+
 404 Not Found:
 ```json
 {
@@ -571,6 +580,7 @@ Create a new envelope with documents from an envelope template.
 - Role mapping must work for all document templates
 - Created documents are automatically added to the envelope
 - With `sendImmediately: true`, each item in **`data.documents[]`** includes `notifications`, `notificationsMuted`, `signingParties` (with signer `notifications` when set), and **`invitationLinks`** (same shape as standalone document instantiate). Envelope-global config is at **`data.envelope.notifications`**. There is no root-level `invitationLinks` array.
+- With `sendImmediately: true`, each document's `expiresAt` is calculated from its effective `configuration.expiration` during queueing. For draft envelopes, `expiresAt` is calculated later when the envelope is sent (`POST /signatures/envelopes/:envelopeId/send`)
 
 ---
 
