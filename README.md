@@ -80,6 +80,7 @@ Create and manage verification requests sent to customers.
 |----------|-------------|
 | **[Initiate Verification](./initiate-verification.md)** | Complete guide to creating verification requests |
 | **[Manage Requests](./verification-requests-management.md)** | List, view, withdraw, and extend verification requests |
+| **[Merchant Users](./merchant-users.md)** | Find or create Cleared user accounts (`POST /api/v1/merchant/users/create`) |
 
 **Key Features**: Multi-service requests, automatic customer lookup, expiration management, in-person mode, request bundling
 
