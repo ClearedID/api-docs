@@ -55,6 +55,12 @@ Endpoints for public-facing signing (token-based, no merchant auth).
 - **Documentation**: [Public Signer API](./public-signer-api.md)
 - **Base Path**: `/api/v1/public/signatures`
 
+### 6. Document signing webhooks
+Event catalog, payload shapes, and verification for document lifecycle notifications.
+
+- **Documentation**: [Document signing webhooks](./document-webhooks.md)
+- **Delivery**: HTTPS POST to your configured endpoint
+
 ## Key Concepts
 
 ### Documents
@@ -247,28 +253,21 @@ Example query parameter:
 
 ## Webhooks
 
-Document signature events can trigger webhooks to your configured endpoint:
-- `document.sent` - Document sent to signers
-- `document.viewed` - Signer viewed document
-- `document.signed` - Signer completed signature
-- `document.completed` - All signers completed and digital signature applied
-- `document.declined` - Signer declined to sign
-- `document.expired` - Document expired
-- `document.cancelled` - Document cancelled
+Document signature events can trigger **HTTPS POST** webhooks to your configured endpoints.
 
-Webhook payload example:
-```json
-{
-  "event": "document.completed",
-  "timestamp": "2025-10-19T12:00:00Z",
-  "data": {
-    "documentId": "doc_123456789",
-    "title": "Employment Contract",
-    "status": "completed",
-    "organisationId": "org_123456789"
-  }
-}
-```
+**Full reference:** [Document signing webhooks](./document-webhooks.md)
+
+Supported events:
+
+- `document_created` — document created from a template
+- `document_sent` — document sent for signing
+- `signature_invitation_created` — signing URL ready for a signer
+- `signature_invitation_sent` — invitation email delivered
+- `document_signed` — a signer completed signing
+- `document_completed` — all signers completed
+- `document_sealed` — final digitally signed PDF ready
+
+Configure inline `webhookConfig` on a document or bind central webhook endpoints in the Cleared portal. Verify deliveries with `X-Webhook-Signature` (HMAC-SHA256 of the raw JSON body).
 
 ## Security Considerations
 
@@ -286,10 +285,9 @@ Webhook payload example:
    - Audit logs are immutable and stored permanently
    - Access via the audit log endpoint
 
-4. **PDF Security**
-   - Final PDFs are digitally signed with tamper-evident seal
-   - OCSP/CRL embedded for long-term validation
-   - Original unsigned versions preserved for audit purposes
+4. **PDF integrity**
+   - Final PDFs include a tamper-evident digital certificate when digital signing is enabled
+   - Original unsigned versions may be preserved for audit purposes
 
 ## Support
 
@@ -301,6 +299,9 @@ For API support, contact:
 ---
 
 ## Changelog
+
+### Version 2.2 (June 2026)
+- **Document signing webhooks** — full event catalog and payload reference: [document-webhooks.md](./document-webhooks.md)
 
 ### Version 2.1 (June 2026)
 - **Signing notification controls** — `notifications` (`mute`, `invitations`, `signingUpdates`) on templates, instantiate, send, envelope send, and per-signer; see [signing-notifications.md](./signing-notifications.md)

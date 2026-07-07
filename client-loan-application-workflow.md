@@ -135,11 +135,24 @@ Example: one signer (student) for role “Borrower”:
 
 So for “phase 1” document upload by the student: either the student uploads a file in the ABC Company LLC portal (handled by ABC Company LLC/Loan Origination System) or the document is configured with **attachment requirements** in Cleared and the student attaches files during the signing step; Cleared persists them as part of the signed document.
 
-### Document signing webhook (to Loan Origination System)
-If the **document** has `webhookConfig.url` and `webhookConfig.active`, the gateway sends a **POST** to that URL when a signer **submits** their signature (each signer submission triggers one webhook).
+### Document signing webhooks (to Loan Origination System)
+If the **document** has `webhookConfig.url` and `webhookConfig.active` (or a central webhook binding), Cleared sends **HTTPS POST** notifications for signing lifecycle events.
 
-- **Headers**: `Content-Type: application/json`, `X-Webhook-Signature: sha256=<hex>` (HMAC-SHA256 of the **raw JSON body** using `webhookConfig.secret`).
-- **Body** (example):
+**Full event catalog and payload reference:** [Document signing webhooks](./document-signatures/document-webhooks.md)
+
+Common events in this workflow:
+
+| Event | When |
+|-------|------|
+| `document_sent` | Document or envelope sent for signing |
+| `signature_invitation_created` | Signing URL ready (including when you deliver links yourself) |
+| `signature_invitation_sent` | Invitation email sent to signer |
+| `document_signed` | Each signer submits their signature |
+| `document_completed` | All signers have signed |
+| `document_sealed` | Final legally binding PDF is ready |
+
+- **Headers**: `Content-Type: application/json`, `X-Webhook-Signature: sha256=<hex>` (HMAC-SHA256 of the **raw JSON body** using your webhook secret).
+- **Body** (example — `document_signed`):
 ```json
 {
   "event": "document_signed",
@@ -153,11 +166,11 @@ If the **document** has `webhookConfig.url` and `webhookConfig.active`, the gate
 }
 ```
 
-When the last signer signs, `allSigned` is `true` and `documentStatus` may be `ready_for_digital_signature` (or `completed` if digital signature is not used). Loan Origination System can use this to update the loan application (e.g. “document signed” or “all signed, awaiting seal”).
+When the last signer signs, `allSigned` is `true` and `documentStatus` may be `ready_for_digital_signature` (when digital certificate signing is enabled) or `completed`. Loan Origination System can use these events to update the loan application.
 
 ### Document completion: signer and ABC Company LLC administrator notifications
 After all signers have signed:
-1. If the document uses **digital signature**, status becomes `ready_for_digital_signature`; Cleared processing runs the eSeal process, then sets status to `completed`.
+1. If the document uses **digital certificate signing**, status becomes `ready_for_digital_signature`; Cleared applies the certificate, then sets status to `completed` and may emit **`document_sealed`**.
 2. **Signers**: Cleared sends each signer a **completion email** with a link to view/download the signed PDF (e.g. 7-day expiry).
 3. **ABC Company LLC administrator (client)**: Cleared sends:
    - A **push notification** (in-app),

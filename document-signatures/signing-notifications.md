@@ -154,16 +154,11 @@ Example fragment (envelope send — per document):
 
 ## Webhook events
 
-Subscribe on document webhook bindings to receive per-signer invitation events:
+Invitation and lifecycle webhooks are documented in **[Document signing webhooks](./document-webhooks.md)**.
 
-| Event | When |
-|-------|------|
-| `signature_invitation_created` | A signing URL is materialized for an eligible signer (API send/instantiate, or machine-runner when email is skipped because invitations are muted). |
-| `signature_invitation_sent` | Cleared successfully sends the invitation email to the signer. |
+When invitation emails are muted, Cleared still emits **`signature_invitation_created`** with `deliveryChannel: "link"` and returns **`invitationLinks`** in the API response so you can deliver URLs yourself. **`signature_invitation_sent`** is emitted when Cleared sends the invitation email.
 
-Payload includes `signingUrl`, `signerEmail`, `signerName`, `signerId`, `documentId`, optional `envelopeId`, `documentTitles`, `documents[]`, `deliveryChannel` (`link` or `email`), and `occurredAt`.
-
-Example fragment (envelope):
+Example fragment (`signature_invitation_created`, envelope):
 
 ```json
 {
@@ -262,6 +257,7 @@ Use **`invitationLinks`** from the original send/instantiate response, or call s
 
 ## Related endpoints
 
+- [Document signing webhooks](./document-webhooks.md)
 - [Merchant Signature Documents — Send document](./merchant-signature-documents.md#15-send-document-for-signing)
 - [Document Templates — Instantiate](./document-templates.md#instantiate-template)
 - [Envelopes — Send envelope](./envelopes.md#10-send-envelope)

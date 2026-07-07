@@ -864,24 +864,54 @@ Retrieve analytics and statistics for a document.
 **URL Parameters**:
 - `documentId` (string, required) - Document ID
 
-**Success Response** (200):
+**Success Response** (200) — legacy summary (unchanged):
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalSigners": 2,
+    "signedCount": 1,
+    "pendingCount": 1,
+    "progress": 50,
+    "status": "enqueued",
+    "createdAt": "2025-10-19T10:00:00Z",
+    "sentAt": "2025-10-19T10:05:00Z",
+    "expiresAt": "2025-11-18T10:00:00Z",
+    "completedAt": null
+  }
+}
+```
+
+#### Signing journey analytics (new)
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET .../documents/:documentId/analytics/overview` | KPIs: link opens, sessions, completion, engagement, IDV/face-auth/support counts, funnel |
+| `GET .../documents/:documentId/analytics/signer-activity` | Per-signer opens, time spent, milestones |
+| `GET .../documents/:documentId/analytics/timeline` | Paginated event stream (`signerId`, `eventName`, `from`, `to`, `page`, `limit`) |
+| `GET .../signatures/analytics/workspace` | Org-wide aggregates; optional `documentId` filter |
+
+**Public ingest** (signer app): `POST /api/v1/public/signatures/documents/:documentId/analytics/events`
+
+Body: `{ signerId, token, sessionKey, visitorKey, flowType, events[] }` — JWT must match invitation or direct-link token.
+
+**Overview example** (200):
+
 ```json
 {
   "success": true,
   "data": {
     "views": 12,
     "uniqueViewers": 2,
+    "uniqueSessions": 8,
     "completionRate": 50,
-    "averageTimeToSign": "2.5 hours",
-    "signerActivity": [
-      {
-        "signerId": "507f1f77bcf86cd799439012",
-        "signerName": "John Smith",
-        "views": 8,
-        "timeSpent": "15 minutes",
-        "status": "signed",
-        "signedAt": "2025-10-19T12:00:00Z"
-      }
+    "averageEngagement": "15 minutes",
+    "signerActivity": [],
+    "funnel": [
+      { "step": "link_opened", "count": 12 },
+      { "step": "fields_started", "count": 6 },
+      { "step": "submit_completed", "count": 1 }
     ]
   }
 }

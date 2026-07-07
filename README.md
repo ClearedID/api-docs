@@ -157,6 +157,7 @@ Secure document signing with legal validity and tamper-proof sealing.
 | **[Document Templates](./document-signatures/document-templates.md)** | 9 endpoints for reusable document templates |
 | **[Envelope Templates](./document-signatures/envelope-templates.md)** | 7 endpoints for reusable envelope packages |
 | **[Public Signer API](./document-signatures/public-signer-api.md)** | Token-based signing load/submit (envelope auto-advance) |
+| **[Document signing webhooks](./document-signatures/document-webhooks.md)** | Lifecycle events, payloads, and signature verification |
 
 **Total Endpoints**: 56 endpoints
 
@@ -370,7 +371,7 @@ api-docs/
 4. Store verification results for compliance
 
 ### Use Case 6: ABC Company LLC Loan Application Workflow
-Follow this end-to-end workflow for ABC Company LLC onboarding (IDV via onboarding pages + redirect) and contract signing (document templates, eSeal, and outbound webhooks): [ABC Company LLC – Cleared Workflow Documentation](./client-loan-application-workflow.md)
+Follow this end-to-end workflow for ABC Company LLC onboarding (IDV via onboarding pages + redirect) and contract signing (document templates, digital certificate signing, and outbound webhooks): [ABC Company LLC – Cleared Workflow Documentation](./client-loan-application-workflow.md)
 
 ---
 
