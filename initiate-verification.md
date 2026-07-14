@@ -135,6 +135,7 @@ Create a verification request for a customer.
   - Used for quota tracking
   - Example: `10`
 
+- **`sendBy`** (string, optional) - ISO-8601 date **and** time (e.g. `2026-07-20T15:30:00.000Z`) to schedule the subject invitation. The request is created immediately; email/SMS wait until `sendBy`. **Incompatible with `quiet: true`** — returns **400** (quiet means Cleared will not send the invitation). Batch/`suppressSubjectNotifications` paths that never invite subjects should not use `sendBy`. Date-only values are rejected.
 - **`quiet`** (boolean, optional)
   - If `true`, suppresses notification emails/SMS
   - Default: `false`

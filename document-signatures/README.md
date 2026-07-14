@@ -110,7 +110,7 @@ Granular:
 
 Request-level settings apply globally; signer-role-level `notifications` on each `signingParty` can further suppress when the request does not already suppress that category. Request-level suppression cannot be overridden by signer-level settings.
 
-When notifications are muted or invitations suppressed, the API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers. Merchant **webhooks** and **client (merchant) notifications** are unchanged.
+When notifications are muted or invitations suppressed, the API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers. **`sendBy` cannot be combined with mute** (400) — scheduling only applies when Cleared is the sender. On mute, the runner marks invitations final (`invitationSentAt`) and leaves the enqueue queue without emailing. Merchant **webhooks** and **client (merchant) notifications** are unchanged.
 
 Legacy stored `configuration.quietMode: true` is treated as `notifications.mute: true` when evaluating sends.
 

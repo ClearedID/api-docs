@@ -536,7 +536,9 @@ Send a document to signing parties via email.
       "relativeDays": 30
     }
   },
-  "message": "Please review and sign this employment contract."
+  "message": "Please review and sign this employment contract.",
+  "sendBy": "2026-07-20T15:30:00.000Z"
+
 }
 ```
 
@@ -557,6 +559,7 @@ Send a document to signing parties via email.
     - `relativeDays` (number) - Days until expiration (if type is "relative")
     - `fixedDate` (string) - ISO date (if type is "fixed")
 - `message` (string, optional) - Custom message to include in emails
+- `sendBy` (string, optional) - ISO-8601 date **and** time. Document is enqueued immediately; invitation emails wait until `sendBy`. **Incompatible with muted invitations** — returns **400**.
 
 **Success Response** (200):
 ```json

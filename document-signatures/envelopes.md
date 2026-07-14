@@ -529,6 +529,7 @@ Send an envelope and all its documents to signers.
   - `expiration` (object) - Expiration settings
 - `notifications` (object, optional) - Signer-facing notification controls for the envelope and its documents (`mute`, `invitations`, `signingUpdates`); use `invitationLinks` when invitations are suppressed. See [Signing notification controls](./signing-notifications.md).
 - `message` (string, optional) - Custom message for signers
+- `sendBy` (string, optional) - ISO-8601 date **and** time. Documents are enqueued immediately; invitation emails wait until `sendBy`. **Incompatible with muted invitations** — returns **400**. When `sendBy` is in the future, envelope `status` is **`scheduled`** (not `sent`) until the machine-runner dispatches invitations, then it becomes **`sent`**.
 
 **Success Response** (200):
 ```json
