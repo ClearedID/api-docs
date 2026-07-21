@@ -512,7 +512,11 @@ Send an envelope and all its documents to signers.
       "relativeDays": 30
     }
   },
-  "quietMode": false,
+  "notifications": {
+    "mute": false,
+    "invitations": true,
+    "signingUpdates": true
+  },
   "message": "Please review and sign these onboarding documents."
 }
 ```
@@ -523,7 +527,7 @@ Send an envelope and all its documents to signers.
   - `requireIdVerification` (boolean) - Require ID verification
   - `useDigitalSignature` (boolean) - Apply digital certificate
   - `expiration` (object) - Expiration settings
-- `quietMode` (boolean, optional) - When `true`, suppress all signer-facing emails for the envelope and its documents; use `invitationLinks` in the response
+- `notifications` (object, optional) - Signer-facing notification controls for the envelope and its documents (`mute`, `invitations`, `signingUpdates`); use `invitationLinks` when invitations are suppressed. See [Signing notification controls](./signing-notifications.md).
 - `message` (string, optional) - Custom message for signers
 
 **Success Response** (200):
@@ -535,22 +539,39 @@ Send an envelope and all its documents to signers.
     "status": "sent",
     "documentCount": 3,
     "message": "Please review and sign these onboarding documents.",
-    "quietMode": false,
-    "invitationLinks": [
+    "notificationsMuted": false,
+    "notifications": { "invitations": null, "signingUpdates": null },
+    "documents": [
       {
-        "signerEmail": "john@example.com",
-        "signerName": "John Smith",
-        "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
-        "documentId": "507f1f77bcf86cd799439011",
-        "signerId": "507f1f77bcf86cd799439012",
-        "envelopeId": "507f1f77bcf86cd799439040",
-        "documentTitles": ["Employment Contract", "Non-Disclosure Agreement", "Employee Handbook"]
+        "_id": "507f1f77bcf86cd799439011",
+        "title": "Employment Contract",
+        "status": "enqueued",
+        "notifications": { "mute": true },
+        "notificationsMuted": true,
+        "invitationLinks": [
+          {
+            "signerEmail": "john@example.com",
+            "signerName": "John Smith",
+            "signingUrl": "https://cleared.id/sign/flow?documentId=507f1f77bcf86cd799439011&signerId=507f1f77bcf86cd799439012&token=...",
+            "documentId": "507f1f77bcf86cd799439011",
+            "signerId": "507f1f77bcf86cd799439012"
+          }
+        ],
+        "signingParties": [
+          {
+            "name": "John Smith",
+            "email": "john@example.com",
+            "status": "pending"
+          }
+        ]
       }
     ]
   },
   "message": "Envelope sent successfully"
 }
 ```
+
+Top-level **`notifications`** is envelope-global config only. Per-document effective settings and **`invitationLinks`** are on each **`documents[]`** row (same shape as standalone document send). There is no root-level **`invitationLinks`** array.
 
 **Error Responses**:
 
@@ -591,13 +612,13 @@ Send an envelope and all its documents to signers.
 5. Checks credit balance
 6. Deducts credits
 7. Updates envelope and document statuses
-8. Queues signing invitation emails (one email per signer when not `quietMode`)
+8. Queues signing invitation emails (one email per signer when invitation notifications are enabled)
 
 **Notes**:
 - All documents in envelope sent simultaneously
 - **One invitation email per signer** listing all documents they must sign, with a single link to their first pending document
 - After each signature, signers **auto-advance** to the next unsigned document (see [Public Signer API](./public-signer-api.md))
-- When `quietMode` is `true`, no signer emails are sent; deliver links from `invitationLinks`
+- When invitation notifications are suppressed, no signer emails are sent; deliver links from `invitationLinks`
 - Configuration applied consistently across all documents
 - Status changes from `draft` to `sent`
 

@@ -444,7 +444,7 @@ Create a new envelope with documents from an envelope template.
 
 **Endpoint**: `POST /api/v1/merchant/signatures/envelope-templates/:templateId/instantiate`
 
-**Gateway contract (current)**: Use **`title`** or **`name`** for the envelope display name, and **`documentAssignments`**: one object per document template slot with **`templateId`**, **`isIncluded`**, **`signingParties`**, and optional **`fieldValues`** (field id → string/primitive or `{ "value": <prefill>, "readOnly": true }` for that created document; published field ids only). See **`client-loan-application-workflow.md`** for a full example. Optional **`configuration`** and/or top-level **`useDigitalSignature`**, **`alwaysFaceAuth`**, **`faceAuthCoolDown`**, **`requireLocation`**, **`quietMode`** may be set on the **root** body (applies to every included document) and/or on **each assignment** (overrides root for that document); values are merged into each created **`SignatureDocument.configuration`** (same override rules as document template instantiate — see **`document-templates.md`**). Optional **`sendImmediately`** (boolean): when **`true`**, the envelope is marked **sent** and each created document is **enqueued** with the same configuration merge and optional **`message`** as **`POST …/envelopes/:envelopeId/send`** (so invitations queue without a separate send call). When **`sendImmediately`** is **`true`**, the response includes **`invitationLinks`** (one link per signer to their first pending document, plus **`documentTitles`**) unless **`quietMode`** suppresses emails.
+**Gateway contract (current)**: Use **`title`** or **`name`** for the envelope display name, and **`documentAssignments`**: one object per document template slot with **`templateId`**, **`isIncluded`**, **`signingParties`**, and optional **`fieldValues`** (field id → string/primitive or `{ "value": <prefill>, "readOnly": true }` for that created document; published field ids only). See **`client-loan-application-workflow.md`** for a full example. Optional **`configuration`** and/or top-level **`useDigitalSignature`**, **`alwaysFaceAuth`**, **`faceAuthCoolDown`**, **`requireLocation`**, **`notifications`** may be set on the **root** body (applies to every included document) and/or on **each assignment** (overrides root for that document); values are merged into each created **`SignatureDocument.configuration`** (same override rules as document template instantiate — see **`document-templates.md`**). Optional **`sendImmediately`** (boolean): when **`true`**, the envelope is marked **sent** and each created document is **enqueued** with the same configuration merge and optional **`message`** as **`POST …/envelopes/:envelopeId/send`** (so invitations queue without a separate send call). When **`sendImmediately`** is **`true`**, the response includes **`invitationLinks`** (one link per signer to their first pending document, plus **`documentTitles`**) unless **`quietMode`** suppresses emails.
 
 **URL Parameters**:
 - `templateId` (string, required) - Envelope template ID
@@ -471,7 +471,7 @@ Create a new envelope with documents from an envelope template.
       "order": 2
     }
   ],
-  "customConfiguration": {
+  "configuration": {
     "expiration": {
       "type": "fixed",
       "fixedDate": "2025-11-30"
@@ -489,7 +489,8 @@ Create a new envelope with documents from an envelope template.
   - `email` (string, required) - Signer's email
   - `role` (string, optional) - Signer's role/title
   - `order` (number, required) - Signing order
-- `customConfiguration` (object, optional) - Override template configuration
+- `configuration` (object, optional) - Override template configuration, applied to every created document (per-assignment overrides go on each `documentAssignments[]` entry)
+- `configuration.expiration` (object, **optional**) - Expiration settings. Expiration is never required; when omitted, each document template's default applies. If provided (or inherited) it must be well-formed, otherwise the request fails with **400**: `type` must be `none` | `fixed` | `relative`; `fixedDate` must be a valid date when `type=fixed`; `relativeDays` must be a positive number when `type=relative`
 
 **Success Response** (200):
 ```json
@@ -551,6 +552,14 @@ Create a new envelope with documents from an envelope template.
 }
 ```
 
+400 Bad Request - Malformed expiration (only when an expiration object is provided or inherited):
+```json
+{
+  "error": true,
+  "message": "configuration.expiration.fixedDate is required when expiration type is \"fixed\""
+}
+```
+
 404 Not Found:
 ```json
 {
@@ -570,7 +579,8 @@ Create a new envelope with documents from an envelope template.
 - Signers are applied consistently across all documents
 - Role mapping must work for all document templates
 - Created documents are automatically added to the envelope
-- With `sendImmediately: true`, response includes `quietMode` and `invitationLinks` (envelope entries include `documentTitles` and `envelopeId`)
+- With `sendImmediately: true`, each item in **`data.documents[]`** includes `notifications`, `notificationsMuted`, `signingParties` (with signer `notifications` when set), and **`invitationLinks`** (same shape as standalone document instantiate). Envelope-global config is at **`data.envelope.notifications`**. There is no root-level `invitationLinks` array.
+- With `sendImmediately: true`, each document's `expiresAt` is calculated from its effective `configuration.expiration` during queueing. For draft envelopes, `expiresAt` is calculated later when the envelope is sent (`POST /signatures/envelopes/:envelopeId/send`)
 
 ---
 
@@ -650,12 +660,15 @@ Envelope templates support comprehensive configuration that applies to all docum
       "relativeDays": 30
     },
     "notifications": {
-      "sendReminders": true,
-      "reminderDays": [7, 3, 1]
+      "mute": false,
+      "invitations": true,
+      "signingUpdates": true
     }
   }
 }
 ```
+
+**`configuration.notifications`** — signer-facing email controls for documents created from this envelope template. See [Signing notification controls](./signing-notifications.md).
 
 **Configuration is inherited by all documents in envelopes created from the template.**
 
