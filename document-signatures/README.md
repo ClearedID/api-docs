@@ -55,6 +55,12 @@ Endpoints for public-facing signing (token-based, no merchant auth).
 - **Documentation**: [Public Signer API](./public-signer-api.md)
 - **Base Path**: `/api/v1/public/signatures`
 
+### 6. Document signing webhooks
+Event catalog, payload shapes, and verification for document lifecycle notifications.
+
+- **Documentation**: [Document signing webhooks](./document-webhooks.md)
+- **Delivery**: HTTPS POST to your configured endpoint
+
 ## Key Concepts
 
 ### Documents
@@ -75,13 +81,40 @@ An envelope is a container for multiple related documents that are sent together
 - **Automatic progression** through remaining envelope documents after each signature
 - **Smart link reuse** — reopening a signed document link redirects to the next unsigned document or completion
 
-### Quiet mode (`quietMode`)
+### Notification controls (`notifications`)
 
-When `quietMode` is `true` on a document, envelope, or template configuration (or passed on send/instantiate):
+Control signer-facing emails with a `notifications` object on create/instantiate/send payloads and on template defaults:
 
-- **No signer-facing emails** are sent (invitations, reminders, resend, completion notifications to signers)
-- Merchant **webhooks** and **client (merchant) notifications** are unchanged
-- The API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers
+```json
+{
+  "notifications": {
+    "mute": true
+  }
+}
+```
+
+Granular:
+
+```json
+{
+  "notifications": {
+    "invitations": "mute",
+    "signingUpdates": null
+  }
+}
+```
+
+- **`mute: true`** — suppress all signer-facing signing notifications
+- **`invitations: "mute"`** — suppress invitation emails; `null` = enabled
+- **`signingUpdates: "mute"`** — suppress reminders and signer completion emails; `null` = enabled
+
+Request-level settings apply globally; signer-role-level `notifications` on each `signingParty` can further suppress when the request does not already suppress that category. Request-level suppression cannot be overridden by signer-level settings.
+
+When notifications are muted or invitations suppressed, the API returns **`invitationLinks`** at send/instantiate time so your system can deliver links to signers. Merchant **webhooks** and **client (merchant) notifications** are unchanged.
+
+Legacy stored `configuration.quietMode: true` is treated as `notifications.mute: true` when evaluating sends.
+
+**Full reference**: [Signing notification controls](./signing-notifications.md)
 
 See [Envelopes API](./envelopes.md#10-send-envelope) and [Public Signer API](./public-signer-api.md).
 
@@ -97,7 +130,7 @@ Templates are reusable document configurations that include:
 1. **Merchant creates document** → Status: `draft`
 2. **Merchant uploads PDF and configures fields**
 3. **Merchant adds signers and sends document** → Status: `enqueued`
-4. **Signers receive invitation** (email unless `quietMode`; see `invitationLinks` in API response)
+4. **Signers receive invitation** (email unless muted/suppressed; see `invitationLinks` in API response)
 5. **(Optional) Identity verification** if required
 6. **Signers complete their signatures** — for envelopes, **auto-advance** to next document
 7. **All signers complete** → Status: `ready_for_digital_signature`
@@ -220,28 +253,21 @@ Example query parameter:
 
 ## Webhooks
 
-Document signature events can trigger webhooks to your configured endpoint:
-- `document.sent` - Document sent to signers
-- `document.viewed` - Signer viewed document
-- `document.signed` - Signer completed signature
-- `document.completed` - All signers completed and digital signature applied
-- `document.declined` - Signer declined to sign
-- `document.expired` - Document expired
-- `document.cancelled` - Document cancelled
+Document signature events can trigger **HTTPS POST** webhooks to your configured endpoints.
 
-Webhook payload example:
-```json
-{
-  "event": "document.completed",
-  "timestamp": "2025-10-19T12:00:00Z",
-  "data": {
-    "documentId": "doc_123456789",
-    "title": "Employment Contract",
-    "status": "completed",
-    "organisationId": "org_123456789"
-  }
-}
-```
+**Full reference:** [Document signing webhooks](./document-webhooks.md)
+
+Supported events:
+
+- `document_created` — document created from a template
+- `document_sent` — document sent for signing
+- `signature_invitation_created` — signing URL ready for a signer
+- `signature_invitation_sent` — invitation email delivered
+- `document_signed` — a signer completed signing
+- `document_completed` — all signers completed
+- `document_sealed` — final digitally signed PDF ready
+
+Configure inline `webhookConfig` on a document or bind central webhook endpoints in the Cleared portal. Verify deliveries with `X-Webhook-Signature` (HMAC-SHA256 of the raw JSON body).
 
 ## Security Considerations
 
@@ -259,10 +285,9 @@ Webhook payload example:
    - Audit logs are immutable and stored permanently
    - Access via the audit log endpoint
 
-4. **PDF Security**
-   - Final PDFs are digitally signed with tamper-evident seal
-   - OCSP/CRL embedded for long-term validation
-   - Original unsigned versions preserved for audit purposes
+4. **PDF integrity**
+   - Final PDFs include a tamper-evident digital certificate when digital signing is enabled
+   - Original unsigned versions may be preserved for audit purposes
 
 ## Support
 
@@ -275,10 +300,14 @@ For API support, contact:
 
 ## Changelog
 
+### Version 2.2 (June 2026)
+- **Document signing webhooks** — full event catalog and payload reference: [document-webhooks.md](./document-webhooks.md)
+
 ### Version 2.1 (June 2026)
+- **Signing notification controls** — `notifications` (`mute`, `invitations`, `signingUpdates`) on templates, instantiate, send, envelope send, and per-signer; see [signing-notifications.md](./signing-notifications.md)
 - Envelope invitations: one email per signer with document list and single start link
 - Envelope signing: auto-advance and signed-link redirect/completion
-- `quietMode` on send/instantiate with synchronous `invitationLinks` in responses
+- `notifications` / `configuration.notifications` on send/instantiate with synchronous `invitationLinks` in responses
 - Live `GET .../documents/:documentId/envelope-context` for portal signing
 - Real resend invitation email (merchant API)
 

@@ -129,6 +129,7 @@ When a document belongs to an **envelope**:
 
 ## Related documentation
 
-- [Envelopes API](./envelopes.md) — send, `quietMode`, `invitationLinks`
+- [Envelopes API](./envelopes.md) — send, `notifications`, `invitationLinks`
+- [Signing notification controls](./signing-notifications.md) — mute, invitations, signingUpdates, `invitationLinks`, `NOTIFICATIONS_MUTED`
 - [Merchant Signature Documents API](./merchant-signature-documents.md) — merchant send/resend
 - [API Overview](./README.md)

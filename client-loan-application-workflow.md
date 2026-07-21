@@ -125,8 +125,8 @@ Example: one signer (student) for role “Borrower”:
 
 ### Sending the document (Loan Origination System)
 - **Endpoint**: `POST /api/v1/merchant/signatures/documents/:documentId/send`
-- **Body**: `signingParties` (name, email, role, order, requireIdVerification, etc.), `configuration` (e.g. `useDigitalSignature`, `expiration`, `enforceSigningOrder`, **`quietMode`**), optional `message`.
-- **Effect**: Document status becomes `enqueued`. Credits are deducted. Cleared processing sends invitation emails unless **`quietMode`**; response includes **`invitationLinks`** for client-owned delivery.
+- **Body**: `signingParties` (name, email, role, order, requireIdVerification, etc.), `configuration` (e.g. `useDigitalSignature`, `expiration`, `enforceSigningOrder`, **`notifications`**), optional `message`.
+- **Effect**: Document status becomes `enqueued`. Credits are deducted. Cleared processing sends invitation emails unless invitation notifications are suppressed; response includes **`invitationLinks`** for client-owned delivery.
 
 ### Student signs and optional attachments (phase 1)
 - **Endpoint** (public): `POST /api/v1/public/signatures/documents/sign`
@@ -135,11 +135,24 @@ Example: one signer (student) for role “Borrower”:
 
 So for “phase 1” document upload by the student: either the student uploads a file in the ABC Company LLC portal (handled by ABC Company LLC/Loan Origination System) or the document is configured with **attachment requirements** in Cleared and the student attaches files during the signing step; Cleared persists them as part of the signed document.
 
-### Document signing webhook (to Loan Origination System)
-If the **document** has `webhookConfig.url` and `webhookConfig.active`, the gateway sends a **POST** to that URL when a signer **submits** their signature (each signer submission triggers one webhook).
+### Document signing webhooks (to Loan Origination System)
+If the **document** has `webhookConfig.url` and `webhookConfig.active` (or a central webhook binding), Cleared sends **HTTPS POST** notifications for signing lifecycle events.
 
-- **Headers**: `Content-Type: application/json`, `X-Webhook-Signature: sha256=<hex>` (HMAC-SHA256 of the **raw JSON body** using `webhookConfig.secret`).
-- **Body** (example):
+**Full event catalog and payload reference:** [Document signing webhooks](./document-signatures/document-webhooks.md)
+
+Common events in this workflow:
+
+| Event | When |
+|-------|------|
+| `document_sent` | Document or envelope sent for signing |
+| `signature_invitation_created` | Signing URL ready (including when you deliver links yourself) |
+| `signature_invitation_sent` | Invitation email sent to signer |
+| `document_signed` | Each signer submits their signature |
+| `document_completed` | All signers have signed |
+| `document_sealed` | Final legally binding PDF is ready |
+
+- **Headers**: `Content-Type: application/json`, `X-Webhook-Signature: sha256=<hex>` (HMAC-SHA256 of the **raw JSON body** using your webhook secret).
+- **Body** (example — `document_signed`):
 ```json
 {
   "event": "document_signed",
@@ -153,11 +166,11 @@ If the **document** has `webhookConfig.url` and `webhookConfig.active`, the gate
 }
 ```
 
-When the last signer signs, `allSigned` is `true` and `documentStatus` may be `ready_for_digital_signature` (or `completed` if digital signature is not used). Loan Origination System can use this to update the loan application (e.g. “document signed” or “all signed, awaiting seal”).
+When the last signer signs, `allSigned` is `true` and `documentStatus` may be `ready_for_digital_signature` (when digital certificate signing is enabled) or `completed`. Loan Origination System can use these events to update the loan application.
 
 ### Document completion: signer and ABC Company LLC administrator notifications
 After all signers have signed:
-1. If the document uses **digital signature**, status becomes `ready_for_digital_signature`; Cleared processing runs the eSeal process, then sets status to `completed`.
+1. If the document uses **digital certificate signing**, status becomes `ready_for_digital_signature`; Cleared applies the certificate, then sets status to `completed` and may emit **`document_sealed`**.
 2. **Signers**: Cleared sends each signer a **completion email** with a link to view/download the signed PDF (e.g. 7-day expiry).
 3. **ABC Company LLC administrator (client)**: Cleared sends:
    - A **push notification** (in-app),
@@ -174,7 +187,7 @@ When a loan (or other case) requires **several** related documents signed by the
 2. **Loan Origination System** stores the **envelope template ID** for that product (parallel to storing per-document template IDs).
 3. For a given application, LOS calls **instantiate envelope template** with a display **title**, which documents are **included**, and **signing parties per included document** (names, emails, `roleId` aligned to each document template’s roles where possible).
 4. LOS calls **get envelope documents** to read created documents and their IDs (needed for the next step).
-5. LOS calls **send envelope** with an optional **message**, optional **`quietMode`**, and **per-document digital signature flags** (`documentConfigurations`). Cleared deducts credits, sets the envelope and documents to **sent** / **enqueued**, and queues invitation emails (one per signer unless `quietMode`).
+5. LOS calls **send envelope** with an optional **message**, optional **`notifications`**, and **per-document digital signature flags** (`documentConfigurations`). Cleared deducts credits, sets the envelope and documents to **sent** / **enqueued**, and queues invitation emails (one per signer unless invitation notifications are suppressed).
 6. **Student** signs each document in sequence (signer app auto-advances after each signature). Same public sign endpoint and webhooks as single-document flow. When all documents are complete, notifications follow the same completion rules as for individual documents.
 
 ### Instantiating an envelope from an envelope template (Loan Origination System)
@@ -182,8 +195,8 @@ When a loan (or other case) requires **several** related documents signed by the
 - **Body** (gateway contract):
   - **`title`** (string, optional): Used as the envelope **name**; if omitted, the envelope template’s title is used.
   - **`configuration`** (object, optional) and/or **`useDigitalSignature`** (boolean, optional) at **root**: merged into **every** included document’s configuration (on top of each document template’s published configuration).
-  - **`sendImmediately`** (boolean, optional): when **`true`**, after documents are created the gateway marks the envelope **sent** and each document **enqueued** (same idea as **`sendImmediately`** on single-document template instantiate). Optional **`message`** is stored on each document, matching **`POST …/signatures/envelopes/:envelopeId/send`**. When **`false`** or omitted, the envelope stays **draft** until you call send separately. Response includes **`invitationLinks`** when sent immediately (unless **`quietMode`**).
-  - **`quietMode`** (boolean, optional): on root **`configuration`** or send body — suppress Cleared signer emails; deliver links from **`invitationLinks`** via the student portal instead.
+  - **`sendImmediately`** (boolean, optional): when **`true`**, after documents are created the gateway marks the envelope **sent** and each document **enqueued** (same idea as **`sendImmediately`** on single-document template instantiate). Optional **`message`** is stored on each document, matching **`POST …/signatures/envelopes/:envelopeId/send`**. When **`false`** or omitted, the envelope stays **draft** until you call send separately. Response includes **`invitationLinks`** when sent immediately (unless invitation notifications are suppressed).
+  - **`notifications`** (object, optional): on root **`configuration`** or top-level body — `{ mute, invitations, signingUpdates }` controls signer-facing emails; deliver links from **`invitationLinks`** via the student portal when invitations are suppressed.
   - **`documentAssignments`** (array, required): One entry per document template in the package you want to drive.
     - **`templateId`**: ID of the **document template** slot (must match a template in the envelope template).
     - **`isIncluded`**: If `true`, a document is created from that template; at least one must be included.
@@ -234,12 +247,12 @@ Example body (borrower only; two documents included, roles must match what each 
 - **Endpoint**: `POST /api/v1/merchant/signatures/envelopes/:envelopeId/send`
 - **Body** (gateway contract):
   - **`message`** (string, optional): Shown to signers / stored on the envelope and documents.
-  - **`quietMode`** (boolean, optional): Suppress Cleared invitation/reminder/completion emails to signers; use **`invitationLinks`** in the response to notify via your portal.
+  - **`notifications`** (object, optional): Suppress Cleared invitation/reminder/completion emails to signers when `mute` or category flags are set; use **`invitationLinks`** in the response to notify via your portal.
   - **`documentConfigurations`** (array, optional): `{ "id": "<documentMongoId>", "useDigitalSignature": true|false }` per document in the envelope. If omitted for a document, the gateway defaults **`useDigitalSignature` to `true`** when calculating credits.
 
 Credits are summed from all documents (e.g. digital vs regular per-document), checked against the organisation balance, then deducted. All documents move to **enqueued** for outbound processing. **One invitation email per signer** lists all documents they must sign and links to the first pending document.
 
-**Response** includes **`data.invitationLinks`**: array of `{ signerEmail, signerName, signingUrl, documentId, signerId, envelopeId, documentTitles[] }`.
+**Response** includes **`data.documents[].invitationLinks`** per document (same shape as standalone document send: `{ signerEmail, signerName, signingUrl, documentId, signerId }`). Envelope-global notifications are at **`data.envelope.notifications`** (instantiate) or **`data.notifications`** (send).
 
 ### Sample code (Node.js, merchant API)
 Replace `BASE_URL`, `MERCHANT_JWT`, template and signer values with your environment. Uses `fetch` and the instantiate → get → send sequence.
