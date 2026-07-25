@@ -1,4 +1,4 @@
-﻿# Identity verification workflow guide
+# Identity verification workflow guide
 
 ## Added
 - New public guide explaining the identity verification lifecycle stage by stage, and which webhooks clients should handle at each step

@@ -54,6 +54,7 @@ Verify customer identities with government-issued documents and biometric facial
 |----------|-------------|
 | **[Identity API Overview](./identity/identity-api.md)** | Service introduction, features, and workflow |
 | **[Identity Endpoints](./identity/identity-endpoints.md)** | 35 endpoints for ID verification, TRN validation, face auth, and account recovery |
+| **[Identity verification workflow](./identity/identity-verification-workflow.md)** | Stage-by-stage IDV lifecycle and which client webhooks to expect |
 
 **Key Features**: Passport/ID/driver's licence verification, liveness detection, biometric matching, duplicate detection, TRN verification
 

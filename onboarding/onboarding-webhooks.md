@@ -8,7 +8,7 @@ For the full live list, call the portal **event-catalog** API; this guide covers
 
 | Method | Where |
 |--------|--------|
-| **Onboarding page / organisation binding** | Cleared Screening Portal → Webhooks (or onboarding page webhook settings) |
+| **Onboarding page / organisation binding** | Cleared Verification portal → Webhooks (or onboarding page webhook settings) |
 | **Event filter** | Optional `subscribedEvents` on each binding — omit or leave unset to receive **all** catalog events; use a string array to whitelist specific camelCase event names |
 | **Secret** | Per-endpoint secret used for HMAC (`X-Webhook-Signature`) |
 

@@ -2,9 +2,10 @@
 
 ## Done
 
-- Onboarding webhook catalog doc: `onboarding/onboarding-webhooks.md` (2026-07-24)
-- Cross-links: endpoints, README, loan-workflow (`initialReviewCompleted`, at-least-once)
-- Signing webhooks remain: `document-signatures/document-webhooks.md`
+- Onboarding webhook catalog: `onboarding/onboarding-webhooks.md` (2026-07-24)
+- `dueDiligenceStarted` contract docs (2026-07-25)
+- **Identity verification workflow** guide + Initial Review meaning note; README/endpoints links; Verification portal wording (2026-07-25)
+- Cross-links: endpoints, README, loan-workflow
 
 ## Gaps
 

@@ -2,7 +2,9 @@
 
 ## Current (Jul 2026)
 
-**Phase 3:** Public onboarding webhooks guide shipped — `onboarding/onboarding-webhooks.md` (HMAC, IR deep dive, action→event matrix). Cross-linked from `endpoints.md`, `README.md`, `client-loan-application-workflow.md` (includes `initialReviewCompleted` + at-least-once delivery prose).
+**IDV workflow guide:** `identity/identity-verification-workflow.md` — stage-by-stage client webhooks; defines Initial Review as preliminary clearance (not final clear/reject); IR ≠ due diligence.
+
+**Phase 3:** `onboarding/onboarding-webhooks.md` — HMAC, IR / DD deep dives, action→event matrix. Subscribe via **Verification portal**.
 
 ## Related
 
