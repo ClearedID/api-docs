@@ -563,7 +563,7 @@ Configure webhooks to receive real-time notifications about verification events:
 }
 ```
 
-**Documentation:** Webhooks Guide (Coming soon)
+**Documentation:** [Onboarding (IDV) webhooks](./onboarding/onboarding-webhooks.md) · [Document signing webhooks](./document-signatures/document-webhooks.md)
 
 ## Rate Limiting
 

@@ -174,6 +174,7 @@ Create branded onboarding pages combining lead capture, verifications, and forms
 | Document | Description |
 |----------|-------------|
 | **[Onboarding Pages API](./onboarding-pages.md)** | Complete guide with 12 endpoints |
+| **[Onboarding (IDV) webhooks](./onboarding/onboarding-webhooks.md)** | HMAC, event catalog, `initialReviewCompleted`, action→event matrix |
 
 **Key Features**: Visual page builder, lead capture forms, custom fields, verification workflows, submission tracking, logo management
 
