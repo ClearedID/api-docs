@@ -534,34 +534,26 @@ If the same idempotency key is used again within 24 hours, you'll receive the or
 
 ## Webhooks
 
-Configure webhooks to receive real-time notifications about verification events:
+Configure webhooks to receive real-time notifications about verification and signing events.
 
-**Webhook Events:**
-- `verification.completed` – Verification completed
-- `verification.failed` – Verification failed
-- `verification.expired` – Verification expired
-- `document.signed` – Document signed
-- `background.check.completed` – Background check completed
+**Onboarding (IDV) — camelCase catalog** (subscribe in Screening Portal → Webhooks):
+
+| Event | When |
+|-------|------|
+| `identityVerificationSubmitted` | Identity documents submitted |
+| `initialReviewCompleted` | Initial Review done (human triage **or** automated high-confidence pass after submit). Also signals **Due Diligence** when `eventContext.caseStatus` / `nextCaseStatus` is `due_diligence` (not a final clear). |
+| `identityVerificationCleared` / `identityVerificationRejected` | Final identity decision |
+| `verificationRequestApproved` | Share / approval path |
+
+Treat deliveries as **at-least-once**. Verify `X-Webhook-Signature` (HMAC-SHA256 of the raw JSON body).
+
+**Document signing — snake_case** (e.g. `document_signed`, `document_completed`): see document signing webhooks guide.
 
 **Configuration:**
-1. Go to Admin Portal > Integrations > Webhooks
-2. Add webhook endpoint URL
-3. Select events to receive
-4. Verify webhook signature
-
-**Webhook Payload:**
-```json
-{
-  "event": "verification.completed",
-  "timestamp": "2025-10-19T12:00:00Z",
-  "data": {
-    "verificationId": "verification_id",
-    "status": "verified",
-    "result": {...}
-  },
-  "signature": "sha256=..."
-}
-```
+1. Cleared Screening Portal → Webhooks (or onboarding page webhook settings)
+2. Add HTTPS endpoint URL and optional secret
+3. Optionally whitelist `subscribedEvents` (omit = all catalog events)
+4. Verify webhook signature on every POST
 
 **Documentation:** [Onboarding (IDV) webhooks](./onboarding/onboarding-webhooks.md) · [Document signing webhooks](./document-signatures/document-webhooks.md)
 

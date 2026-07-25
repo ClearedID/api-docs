@@ -368,10 +368,10 @@ console.log('Envelope sent:', sendJson.data);
 ## Webhook contracts and security
 
 ### Onboarding (IDV) webhook
-- **When**: After verification request creation (with onboarding meta), when events are marked pending (e.g. customer approve, ops decision: identity/address/reference cleared or rejected), when ops completes **Initial Review** (`initialReviewCompleted` — triage advance or legacy mark-complete; **not** on IR reject), and when the customer **confirms share** or **approves** so results are added to the organisation **`accessList`** (`${type}VerificationApproved` plus `verificationRequestApproved` on full share). Repeat intentional re-share enqueues webhooks even when usage billing is deduped. A batch job sends pending events to the configured URL. Full catalog and IR `eventContext` contract: [Onboarding webhooks](./onboarding/onboarding-webhooks.md).
+- **When**: After verification request creation (with onboarding meta); when identity/address/reference (and similar) are cleared or rejected; when **Initial Review** completes (`initialReviewCompleted` — manual review or **automated high-confidence pass** after ID submit; **not** when rejected at Initial Review); when the case enters **Due Diligence** (same `initialReviewCompleted` event with `eventContext.caseStatus` / `nextCaseStatus` = `due_diligence` and identity `verifications[].status` = `due_diligence` — still not cleared); and when the customer **confirms share** or **approves** so results are shared with your organisation (`${type}VerificationApproved` plus `verificationRequestApproved` on full share). Repeat intentional re-share can deliver webhooks again. Cleared delivers pending events to your configured URL. Full catalog, automated Initial Review (`source: image_check_auto_ir`), and Due Diligence consumption: [Onboarding webhooks](./onboarding/onboarding-webhooks.md).
 - **Method**: POST.
 - **Headers**: `Content-Type: application/json`. If a secret is configured: `Authorization` (or custom header) per secret format, and **`X-Webhook-Signature: sha256=<hex>`** where the HMAC-SHA256 is computed over the **raw JSON body string** (canonical) using the webhook secret.
-- **Body** (VerificationStatus style): includes `customerName`, `verifications` (array with `type`, `status`, and type-specific fields such as identity `documentType`, `clearedAt`, `expiresAt`), and **`onboarding`**: `{ pageId, onboardingPageId, urlParameters }`, plus **`eventName`** (e.g. `verificationRequestApproved`, `identityVerificationCleared`, `identityVerificationRejected`, `initialReviewCompleted`; default `verificationStatusUpdated`), **`eventContext`**, **`eventOccurredAt`** (ISO).
+- **Body** (VerificationStatus style): includes `customerName`, `verifications` (array with `type`, `status`, `initialReviewStatus`, and type-specific fields such as identity `documentType`, `clearedAt`, `expiresAt`), and **`onboarding`**: `{ pageId, onboardingPageId, urlParameters }`, plus **`eventName`** (e.g. `verificationRequestApproved`, `identityVerificationCleared`, `identityVerificationRejected`, `initialReviewCompleted`; default `verificationStatusUpdated`), **`eventContext`**, **`eventOccurredAt`** (ISO).
 
 **Verification**: Recipient should recompute HMAC-SHA256 on the raw request body and compare with `X-Webhook-Signature` (value after `sha256=`). If invalid, respond with 401.
 
@@ -387,15 +387,15 @@ console.log('Envelope sent:', sendJson.data);
 ## Failure handling and retries
 
 ### Onboarding webhooks
-- **Delivery**: Events are enqueued as `WebHookEvent` rows and delivered by the machine-runner batch (and optionally same-process fire when org/master auto-fire flags are on). Treat inbound posts as **at-least-once** — the same logical occurrence may be delivered more than once after reclaim/retry of a failed or stale run.
+- **Delivery**: Cleared queues events and delivers them to your configured URL. Treat inbound posts as **at-least-once** — the same logical occurrence may be delivered more than once.
 - **Idempotency**: Implement the receiver to be **idempotent** (e.g. by `eventName` + `eventOccurredAt` + `onboarding.urlParameters.applicationId`) and return 2xx quickly.
-- A **new** event row is created when a **new** occurrence happens (e.g. another approval or ops decision).
+- A **new** delivery is created when a **new** occurrence happens (e.g. another approval or decision).
 
 ### Verification Links webhooks (if used)
 If ABC Company LLC uses Verification Links instead of (or in addition to) onboarding pages, the documented retry policy for that product is: immediate retry after 5 s, second after 1 min, third after 5 min, then mark failed.
 
 ### Document signing webhook
-- The gateway fires the webhook once per sign submission. There is no built-in retry documented for this outbound call; implement the receiver to be idempotent and return 2xx.
+- Cleared sends the webhook once per sign submission. There is no built-in retry documented for this outbound call; implement the receiver to be idempotent and return 2xx.
 
 ---
 ## Reference: key endpoints and files

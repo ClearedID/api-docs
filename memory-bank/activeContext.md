@@ -2,7 +2,7 @@
 
 ## Current (Jul 2026)
 
-**Phase 3:** Public onboarding webhooks guide shipped — `onboarding/onboarding-webhooks.md` (HMAC, IR deep dive, action→event matrix). Cross-linked from `endpoints.md`, `README.md`, `client-loan-application-workflow.md` (includes `initialReviewCompleted` + at-least-once delivery prose).
+**Client IR + Due Diligence webhook docs:** `onboarding/onboarding-webhooks.md` documents `initialReviewCompleted` for human triage, automated image-check IR pass (`source: image_check_auto_ir`), and Due Diligence stage consumption (`caseStatus` / `nextCaseStatus` / identity `status` = `due_diligence`). Cross-linked from loan workflow + README.
 
 ## Related
 

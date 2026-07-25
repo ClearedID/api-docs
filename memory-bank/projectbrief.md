@@ -4,4 +4,4 @@ Public Cleared API documentation (Markdown) published as docs.cleared.id. Covers
 
 ## Gaps
 
-No dedicated onboarding webhook event catalog doc (signing has `document-signatures/document-webhooks.md`).
+Signing has `document-signatures/document-webhooks.md`. Onboarding webhook catalog lives at `onboarding/onboarding-webhooks.md` (IR + Due Diligence consumption included).
