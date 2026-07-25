@@ -51,7 +51,8 @@ All onboarding event names use **camelCase**. Below are common decision / IR eve
 
 | Event | Category | When Cleared sends it |
 |-------|----------|------------------------|
-| `initialReviewCompleted` | decisions | Ops completes **Initial Review** (triage advance or legacy mark-complete). **Not** sent on IR reject. |
+| `initialReviewCompleted` | decisions | Ops completes **Initial Review** (triage advance or legacy mark-complete). **Not** sent on IR reject. **Does not** start due diligence. |
+| `dueDiligenceStarted` | decisions | Ops starts **due diligence** after Initial Review (separate Start due diligence action). |
 | `identityVerificationCleared` | decisions | Identity cleared by ops |
 | `identityVerificationRejected` | decisions | Identity rejected by ops |
 | `identityVerificationApproved` | decisions | Customer / share approval path for identity |
@@ -73,8 +74,8 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `level` | `1` \| `2` \| `3`, or `null` (legacy mark-complete) |
 | `riskCategory` | Derived: `1→low`, `2→medium`, `3→high`, else `null` |
 | `reasonCodes` | string[] (may be empty) |
-| `caseStatus` | Actual identity result **status** after advance (`processing` / `flagged` / `due_diligence`, etc.) |
-| `nextCaseStatus` | Triage choice when available (`continue_review`, `due_diligence`, `awaiting_resubmission`, …) |
+| `caseStatus` | Actual identity result **status** after advance (`processing` / `flagged`, etc.) |
+| `nextCaseStatus` | Triage choice when available (`continue_review`, `awaiting_resubmission`, …). **Not** `due_diligence` — that is a separate Start due diligence action. |
 | `resubmissionRequired` | boolean |
 | `resubmission` | Present when required: `{ requestId, labels? }` — omitted when not required |
 | `reviewedAt` | ISO string |
@@ -108,12 +109,29 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | Ops / triage action | Client onboarding event | Ops PA topic (Teams / Power Automate) |
 |---------------------|-------------------------|----------------------------------------|
 | claim / assign / release / start / reassign | *(none — audit only)* | *(none)* |
-| advance (`continue_review` / `due_diligence` / `awaiting_resubmission`) | `initialReviewCompleted` | `initial_review_completed` |
+| advance (`continue_review` / `awaiting_resubmission`) | `initialReviewCompleted` | `initial_review_completed` |
+| start due diligence (post-IR) | `dueDiligenceStarted` | `due_diligence_started` |
 | reject | **No** `initialReviewCompleted` — identity owns `identityVerificationRejected` | `initial_review_completed` (ops) + later `identity_decided` from identity decision path |
+
+## Deep dive: `dueDiligenceStarted`
+
+Emitted when an agent starts due diligence **after** Initial Review is complete. Separate from `initialReviewCompleted`.
+
+### `eventContext` fields
+
+| Field | Rule |
+|-------|------|
+| `resultType` / `verificationType` / `resultId` | Always present |
+| `source` | `ops_due_diligence_started` |
+| `caseStatus` | `due_diligence` |
+| `dueDiligenceCategory` | string or `null` |
+| `reasonCodes` | string[] (may be empty) |
+| `startedAt` | ISO string |
+| `finalStatus` | Always `"pending"` |
 
 ## Related
 
 - [Client loan / onboarding workflow](../client-loan-application-workflow.md) — end-to-end IDV + webhooks
 - [Document signing webhooks](../document-signatures/document-webhooks.md) — snake_case signing events
 - [API endpoints overview](../endpoints.md) — webhooks section
-- Ops engineering runbook (internal): `docs/ops-webhook-publishing.md` — topic `initial_review_completed`
+- Ops engineering runbook (internal): `docs/ops-webhook-publishing.md` — topics `initial_review_completed`, `due_diligence_started`
