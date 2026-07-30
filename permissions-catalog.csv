@@ -1,0 +1,267 @@
+Name,Category,Description,Id,SubCategory,Registry
+Full Access,System,Bypasses all permission checks; granted automatically to organisation owners.,full_access,Access,Portal
+View Role Management,Admin,Access the Roles & permissions screen to see which roles exist and what permissions they carry.,view_role_management,Roles,Portal
+Manage Roles and Permissions,Admin,"Create or edit roles, assign permission sets to roles, and remove roles; required to change what team members can do.",manage_roles_and_permissions,Roles,Portal
+View all subscriptions,Admin,List every plan and add-on the organisation is subscribed to; needed for billing and capacity decisions.,view_subscriptions,Subscriptions,Portal
+View subscription details,Admin,"Open one subscription to see plan name, status, renewal date, and linked usage or limits.",view_subscription_details,Subscriptions,Portal
+Start a subscription,Admin,"Enrol the organisation in a new plan or add-on (e.g. identity, screening) so the team can use that feature.",create_subscription,Subscriptions,Portal
+Cancel a subscription,Admin,End an existing plan or add-on so it stops renewing and the feature is no longer available.,delete_subscription,Subscriptions,Portal
+View organisation details,Admin,"See the organisation’s name, branding, and high-level settings (e.g. enterprise status) without editing.",view_organisation_details,Organisations,Portal
+Request enterprise access,Admin,Submit or trigger a request for enterprise-level features or terms for the organisation.,update_organisation_enterprise_access,Organisations,Portal
+Update organisation details,Admin,"Change the organisation’s name, branding, or other settings stored at org level.",update_organisation_details,Organisations,Portal
+View organisation documents,Admin,"Access documents or files stored under the organisation (e.g. contracts, certificates).",view_organisation_documents,Organisations,Portal
+Create organisation documents,Admin,Upload or create new documents that belong to the organisation.,create_organisation_documents,Organisations,Portal
+View all team members,Admin,"List everyone in the organisation’s team, their roles, and invite status.",view_organisation_team,Team,Portal
+Remove team members,Admin,Remove a user from the organisation so they lose access to the portal and APIs for this org.,delete_organisation_team_member,Team,Portal
+Invite team members,Admin,Send email invitations so new users can join the organisation’s team.,update_organisation_team_invitations,Team,Portal
+Update team member,Admin,"Change a team member’s assigned role(s), permission overrides, or department.",update_organisation_team_member,Team,Portal
+View departments,Admin,List the organisation’s departments used when assigning team members.,view_organisation_departments,Departments,Portal
+Manage departments,Admin,"Create, edit, or remove organisation departments.",manage_organisation_departments,Departments,Portal
+Manage notification groups,Admin,Define and edit groups that control who receives which system or product notifications.,manage_notification_groups,Notifications,Portal
+View in-app notifications,Settings,Use the notifications bell and drawer in the portal to read and dismiss in-app alerts.,view_in_app_notifications,Notifications,Portal
+View all ID verification requests,Identity Verification,List every ID verification request (e.g. link sent to a candidate) and their status.,view_identity_verification_requests_list,Requests,Portal
+View ID verification request details,Identity Verification,"Open one request to see expiry, link, and whether it was completed or withdrawn.",view_identity_verification_request_details,Requests,Portal
+View all screening results,Screening,"List all risk screening cases and their outcomes (e.g. sanctions, PEP, adverse media).",view_screening_results_list,Results,Portal
+View screening result,Screening,"Open one screening case to see hits, sources, and risk flags in detail.",view_screening_result,Results,Portal
+Submit screening request,Screening,"Run a new screening (e.g. sanctions, PEP, adverse media) for a person or company.",submit_screening_request,Requests,Portal
+View screening dashboard,Screening,"Access the screening overview (counts, recent cases, quick actions).",view_screening_dashboard,Dashboard,Portal
+View all people,Screening,List people that have been screened or are linked to screening cases.,view_people,People,Portal
+View person details,Screening,"Open one person record to see name, identifiers, and linked screening results.",view_person,People,Portal
+Edit person,Screening,"Change a person’s name, DOB, or other details in the screening database.",edit_person,People,Portal
+Delete person,Screening,Remove a person record from the screening area (e.g. for data minimisation).,delete_person,People,Portal
+Create person,Screening,Add a new person to the screening database so they can be screened.,create_person,People,Portal
+View all companies,Screening,List companies that have been screened or are linked to screening cases.,view_companies,Companies,Portal
+View company details,Screening,"Open one company record to see name, registration, and linked screening results.",view_company,Companies,Portal
+Create company,Screening,Add a new company to the screening database so it can be screened.,create_company,Companies,Portal
+Edit company,Screening,"Change a company’s name, registration number, or other details.",edit_company,Companies,Portal
+Delete company,Screening,Remove a company record from the screening area.,delete_company,Companies,Portal
+Business discovery,Screening,Search external sources to discover and match companies before or after screening.,business_discovery,Companies,Portal
+Archive screening case,Screening,Archive or unarchive a screening case so it is hidden from or restored to active lists.,archive_screening_case,Cases,Portal
+Create screening case,Screening,Start a new screening case and attach people or companies to run checks.,create_screening_case,Cases,Portal
+Create screening template,Screening,Define a reusable set of screening checks (e.g. sanctions + PEP) to run on cases.,create_screening_template,Templates,Portal
+Update screening template,Screening,Change the checks or settings of an existing screening template.,update_screening_template,Templates,Portal
+Archive screening template,Screening,Archive a template so it can no longer be applied to new cases.,archive_screening_template,Templates,Portal
+Run screening search,Screening,"Execute or re-run searches (e.g. sanctions, PEP) within a screening case.",run_screening_search,Cases,Portal
+Contact screening candidate,Screening,Send messages or requests to a candidate linked to a screening case.,contact_screening_candidate,Cases,Portal
+Request screening verification,Screening,Request that a candidate provide or confirm information for the screening case.,request_screening_verification,Cases,Portal
+View dashboard,Dashboard,"Access the main portal dashboard (stats, quick actions, recent activity).",view_dashboard,Overview,Portal
+View operations report,Dashboard,"View organisation operations metrics (signed applications, ID verification outcomes, daily blockers) and export CSV for invoice checks.",view_operations_report,Reports,Portal
+View verification request workflow,Identity Verification,See the Workflow timeline on a verification request (ops actions such as waiting on TRN or re-upload).,view_verification_request_workflow,Requests,Portal
+View all profiles,Profiles,Access the profiles list and search or filter people who have completed verifications.,view_profiles,List,Portal
+View profile details,Profiles,Open a profile page; which tabs and evidence you see still depend on separate tab and evidence permissions.,view_profile_details,Details,Portal
+View profile Identity tab,Profiles,"See the Identity tab on a profile: document type, status, and result summary only (no ID images unless you also have view identity evidence).",view_profile_identity_tab,Details,Portal
+View profile Address tab,Profiles,See the Address tab: verified address and result summary only (no document or photo files unless you also have view address evidence).,view_profile_address_tab,Details,Portal
+View profile References tab,Profiles,See the References tab: character or employer references and their status or response.,view_profile_references_tab,Details,Portal
+View profile Employment tab,Profiles,See the Employment tab: employment history and verification outcomes.,view_profile_employment_tab,Details,Portal
+View profile Qualifications tab,Profiles,"See the Qualifications tab: qualification and credential verification outcomes (degrees, diplomas, certifications).",view_profile_education_tab,Details,Portal
+View profile Income tab,Profiles,"See the Income tab: income verification results (e.g. employer, amount, date range).",view_profile_income_tab,Details,Portal
+Export income evidence profile,Profiles,"Download JSON, CSV, or PDF exports of the income evidence v2 profile when the full report is visible.",export_profile_income_evidence,Details,Portal
+View profile Criminal Records tab,Profiles,See the Criminal Records tab: background check results and any disclosures.,view_profile_criminal_tab,Details,Portal
+View profile Tenancy tab,Profiles,See the Tenancy history tab: past tenancies and landlord references.,view_profile_tenancy_tab,Details,Portal
+View profile Screening tab,Profiles,See the Screening tab: risk screening cases and results linked to this profile.,view_profile_screening_tab,Details,Portal
+Manage profile screening monitoring,Profiles,Configure recurring background screening monitoring on a profile.,manage_profile_screening_monitoring,Details,Portal
+Manage company screening monitoring,Screening,Configure recurring background screening monitoring on a company screening result.,manage_company_screening_monitoring,Companies,Portal
+View profile Documents tab,Profiles,"See documents this person has signed or is listed on as a signing party, with status and view link when complete.",view_profile_documents_tab,Details,Portal
+View identity evidence,Profiles,View or request watermarked ID document images and selfie/media on a profile; needed in addition to the Identity tab to see actual ID photos.,view_identity_evidence,Evidence,Portal
+View address evidence,Profiles,View address proof documents and residence photos on a profile; needed in addition to the Address tab to open or download those files.,view_address_evidence,Evidence,Portal
+Manage table filters,Profiles,"Save, edit, and delete saved filters on the profiles table (e.g. “Cleared only”, “Pending”) for yourself or your team.",manage_table_filters,Filters,Portal
+Extend verification request,Identity Verification,Give a candidate more time to complete a verification by extending the request expiry.,extend_verification_request,Requests,Portal
+Withdraw verification request,Identity Verification,Cancel an active request so the link no longer works and the candidate cannot submit.,withdraw_verification_request,Requests,Portal
+Create verification request template,Identity Verification,Define a reusable template (e.g. which checks to request) so you can send the same type of request repeatedly.,create_verification_request_template,Templates,Portal
+Update verification request template,Identity Verification,Change the checks or settings of an existing verification request template.,update_verification_request_template,Templates,Portal
+Delete verification request template,Identity Verification,Remove a template so it can no longer be used to create new requests.,delete_verification_request_template,Templates,Portal
+Create organisation,Admin,Create a new organisation so a new team or brand can use the portal under its own billing and settings.,create_organisation,Organisations,Portal
+Upload organisation logo,Admin,Upload or replace the logo shown in the portal and on shared links for this organisation.,upload_organisation_logo,Organisations,Portal
+Delete organisation logo,Admin,Remove the organisation logo so the default or no logo is shown.,delete_organisation_logo,Organisations,Portal
+View billing,Admin,"Access the billing area to see plans, usage, payment methods, and credit balance.",view_billing,Billing,Portal
+Add payment method,Admin,Add a new card or payment method for the organisation’s billing.,add_payment_method,Billing,Portal
+Set primary payment method,Admin,Choose which payment method is used by default for charges and renewals.,set_primary_payment_method,Billing,Portal
+Delete payment method,Admin,Remove a saved payment method so it can no longer be charged.,delete_payment_method,Billing,Portal
+Purchase credit bundle,Admin,Buy a pack of credits (e.g. for verifications or screening) when using pay-as-you-go.,purchase_credit_bundle,Billing,Portal
+Switch billing mode,Admin,Change the organisation between subscription billing and pay-as-you-go (or vice versa).,switch_billing_mode,Billing,Portal
+View all documents,Documents,"List all documents (e.g. contracts, forms) that the organisation has created or received for signing.",view_documents_list,Documents,Portal
+Create document,Documents,Create a new document (upload or from template) so it can be sent for signing.,create_document,Documents,Portal
+View document,Documents,Open a single document to read its contents and see signing status.,view_document,Documents,Portal
+Download document,Documents,Download a copy of a document file (e.g. PDF) to your device.,download_document,Documents,Portal
+Reuse document,Documents,"Use an existing document as the basis for a new one (e.g. same content, new signers).",reuse_document,Documents,Portal
+Cancel document,Documents,Cancel a document so signers can no longer sign and it is marked cancelled.,cancel_document,Documents,Portal
+Remind document signers,Documents,Send a reminder email to signers who have not yet signed.,remind_document_signers,Documents,Portal
+Create template from document,Documents,Save a completed or draft document as a reusable template for future sends.,create_template_from_document,Documents,Portal
+Update document,Documents,Edit a document’s content or settings before or after sending.,update_document,Documents,Portal
+Send document,Documents,Send a document to signers so they receive the signing link and can complete it.,send_document,Documents,Portal
+Delete document,Documents,Permanently remove a document from the organisation’s document list.,delete_document,Documents,Portal
+Add document to envelope,Documents,Add one or more documents to an envelope so they can be sent together for signing.,add_document_to_envelope,Documents,Portal
+Create envelope,Documents,Create a new envelope to group documents and send them in one signing flow.,create_envelope,Envelopes,Portal
+View all document templates,Documents,List all saved document templates the organisation can use to create new documents.,view_document_templates_list,Templates,Portal
+Create document template,Documents,Create a new template (e.g. standard contract) so the team can send documents from it repeatedly.,create_document_template,Templates,Portal
+Duplicate document template,Documents,Copy an existing template to create a variant or backup.,duplicate_document_template,Templates,Portal
+Delete document template,Documents,Remove a template so it can no longer be used to create documents.,delete_document_template,Templates,Portal
+Use document template,Documents,Start a new document from a template (pre-filled content and fields).,use_document_template,Templates,Portal
+Publish document template version,Documents,Publish staged template changes so they become the live version used for new documents and signing.,publish_document_template_version,Templates,Portal
+Restore document template version,Documents,Restore a previous template version as the new pending version (for review and re-publish).,restore_document_template_version,Templates,Portal
+Publish document version,Documents,Publish staged document changes so they become the live version used when sending for signing.,publish_document_version,Documents,Portal
+Restore document version,Documents,Restore a previous document version as the new pending version (for review and re-publish).,restore_document_version,Documents,Portal
+View all envelopes,Documents,List all envelopes (groups of documents sent together) and their status.,view_envelopes_list,Envelopes,Portal
+View envelope,Documents,Open one envelope to see its documents and signing progress.,view_envelope,Envelopes,Portal
+Send envelope,Documents,Send an envelope to signers so they receive links to sign all documents in it.,send_envelope,Envelopes,Portal
+Cancel envelope,Documents,Cancel an envelope so no further signing can occur.,cancel_envelope,Envelopes,Portal
+Remove document from envelope,Documents,Remove a document from an envelope before sending (or to correct the set).,remove_document_from_envelope,Envelopes,Portal
+Download envelope documents,Documents,Download the documents contained in an envelope as files.,download_envelope_documents,Envelopes,Portal
+View all envelope templates,Documents,List all saved envelope templates (document sets + signer roles) the organisation can reuse.,view_envelope_templates_list,Envelope Templates,Portal
+Create envelope template,Documents,Create a new envelope template so the team can send the same document set repeatedly.,create_envelope_template,Envelope Templates,Portal
+Duplicate envelope template,Documents,Copy an existing envelope template to create a variant.,duplicate_envelope_template,Envelope Templates,Portal
+Delete envelope template,Documents,Remove an envelope template so it can no longer be used.,delete_envelope_template,Envelope Templates,Portal
+Update envelope template,Documents,Edit an envelope template’s documents or signer configuration.,update_envelope_template,Envelope Templates,Portal
+Use envelope template,Documents,Create a new envelope from a template (pre-filled document set and roles).,use_envelope_template,Envelope Templates,Portal
+View preferences,Settings,"Access the preferences screen to see language, currency, and display options (read-only without update permission).",view_preferences,Preferences,Portal
+Update preferences,Settings,"Change your language, currency, date format, or other personal display preferences.",update_preferences,Preferences,Portal
+View account settings,Settings,"Access the account screen to see your email, name, and security-related settings.",view_account_settings,Account,Portal
+View Security settings,Settings,"Access Security for password, MFA, and trusted devices.",view_security_settings,Security,Portal
+Manage security credentials,Settings,"Change password, configure SMS MFA and authenticator apps.",manage_security_credentials,Security,Portal
+Request email change,Settings,Start the process to change the email address used to log in (triggers verification email).,request_email_change,Account,Portal
+Verify email change,Settings,Complete an email change by confirming the new address via the link sent to that address.,verify_email_change,Account,Portal
+Verify reference number,Identity Verification,Look up a verification request by its reference number (e.g. to check status without logging in).,verify_reference_number,Verify,Portal
+View support,Support,"Access the help and support area (docs, contact options); not used for access control as support is available to all.",view_support,Help,Portal
+View integrations,Admin,"Access the integrations screen to see API keys, webhook URLs, and allowed domains (read-only without other integration permissions).",view_integrations,Integrations,Portal
+Generate API key,Admin,Create a new API key so external systems can call Cleared APIs on behalf of the organisation.,generate_api_key,Integrations,Portal
+Update webhook endpoint,Admin,Change the URL where Cleared sends webhook events (e.g. verification completed).,update_webhook_endpoint,Integrations,Portal
+Update landing page,Admin,Change the URL or page where candidates are sent to start a verification (e.g. your own hosted flow).,update_landing_page,Integrations,Portal
+Add integration domain,Admin,Allow another domain (e.g. your app’s origin) to use the organisation’s integrations or embed verification.,add_integration_domain,Integrations,Portal
+Remove integration domain,Admin,Revoke a previously allowed domain so it can no longer use the organisation’s integrations.,remove_integration_domain,Integrations,Portal
+Access onboarding workspace,Onboarding Surface,Open the dedicated Onboarding workspace at /onboarding to manage legacy pages and (future) onboarding apps.,onboarding_surface_access,Surface,Portal
+View all onboarding pages,Onboarding Pages,List all onboarding or lead-capture pages the organisation has created.,view_onboarding_pages_list,Pages,Portal
+Create onboarding page,Onboarding Pages,Create a new onboarding page so candidates can submit info or complete a flow via a shared link.,create_onboarding_page,Pages,Portal
+Delete onboarding page,Onboarding Pages,Permanently remove an onboarding page and (depending on config) its collected data.,delete_onboarding_page,Pages,Portal
+Update onboarding page,Onboarding Pages,"Edit an onboarding page’s fields, layout, or settings.",update_onboarding_page,Pages,Portal
+Publish onboarding page,Onboarding Pages,Publish staged onboarding page changes so the public link shows the updated content.,publish_onboarding_page,Pages,Portal
+Restore onboarding page version,Onboarding Pages,Restore a previously published version into staging for review and re-publish.,restore_onboarding_page,Pages,Portal
+Send onboarding invitations,Onboarding Pages,Send invite links or emails so candidates can access and complete an onboarding page.,send_onboarding_invitations,Invitations,Portal
+View onboarding entries,Onboarding Pages,See the list of submissions or entries (who completed the page and when).,view_onboarding_entries,Entries,Portal
+View onboarding event logs,Onboarding Pages,"See the audit trail of events for an onboarding page (e.g. opened, submitted, bounced).",view_onboarding_event_logs,Event Logs,Portal
+View onboarding analytics,Onboarding Pages,"See funnel, trends, and lead-capture field breakdowns for an onboarding page.",view_onboarding_analytics,Analytics,Portal
+Manage onboarding custom fields,Onboarding Pages,"Add, edit, or remove custom fields on an onboarding page so you collect the data you need.",manage_onboarding_custom_fields,Custom Fields,Portal
+View webhook configs,Admin,"List and view central webhook endpoint configs (onboarding, documents, etc.).",view_webhook_configs,Webhooks,Portal
+Manage webhook configs,Admin,"Create, edit, and delete central webhook endpoint configs.",manage_webhook_configs,Webhooks,Portal
+View webhook event logs,Admin,"View unified event logs for all webhook types (onboarding, documents) with filters.",view_webhook_event_logs,Webhooks,Portal
+Rerun webhook events,Admin,Queue failed or skipped webhook events for another delivery attempt (up to the organisation additional-rerun limit).,rerun_webhook_events,Webhooks,Portal
+View all verification links,Verification Links,List all shareable verification links (e.g. one-time or reusable) and their status.,view_verification_links_list,List,Portal
+Create verification link,Verification Links,Generate a new verification link to share with a candidate (e.g. embed in your app or email).,create_verification_link,Manage,Portal
+Update verification link,Verification Links,"Edit a verification link’s expiry, type, or other settings.",update_verification_link,Manage,Portal
+Delete verification link,Verification Links,Revoke or delete a verification link so it can no longer be used.,delete_verification_link,Manage,Portal
+Add company,Screening,Add a company to the screening company list so it can be screened or linked to cases.,add_company,Companies,Portal
+Create company screening result,Screening,Record or create a screening result (e.g. manual outcome) for a company.,create_company_screening_result,Companies,Portal
+Search companies,Screening,"Search the screening company list by name, registration, or other criteria.",search_companies,Companies,Portal
+Initiate sanctions search,Screening,Run a sanctions list check on a company to see if it appears on restricted lists.,initiate_sanctions_search,Companies,Portal
+Initiate reputation search,Screening,Run a reputation or adverse media search on a company.,initiate_reputation_search,Companies,Portal
+Initiate legal search,Screening,Run a legal or court-record search on a company.,initiate_legal_search,Companies,Portal
+Request financial verification,Screening,Request that financial or credit information be verified for a company.,request_financial_verification,Companies,Portal
+Request address verification,Screening,Request that the company’s address be verified (e.g. proof of business address).,request_address_verification,Companies,Portal
+View all digital IDs,Digital IDs,List digital ID credentials (e.g. mobile-based IDs) that have been issued or linked to the organisation.,view_digital_ids,List,Portal
+View digital ID audit,Digital IDs,"View the audit log of digital ID events (issuance, presentation, revocation) for compliance.",view_digital_id_audit,Audit,Portal
+Export digital ID audit,Digital IDs,Export the digital ID audit log (e.g. CSV) for external reporting or archiving.,export_digital_id_audit,Audit,Portal
+View all batch verification requests,Identity Verification,List all batch verification jobs (e.g. CSV uploads) and their progress or outcome.,view_batch_verification_requests,Batch,Portal
+Upload batch verification request,Identity Verification,Upload a file (e.g. CSV) to start a batch of identity or address verifications.,upload_batch_verification_request,Batch,Portal
+Submit batch verification request,Identity Verification,Submit or start a batch job so the system processes multiple verification requests from the uploaded data.,submit_batch_verification_request,Batch,Portal
+AI generate lead capture,Onboarding Pages,"Use AI-assisted tools to generate or suggest lead-capture form content (e.g. questions, fields) for onboarding pages.",ai_generate_lead_capture,Lead Capture,Portal
+AI generate onboarding app,Onboarding Apps,"Use AI to generate or enhance onboarding app drafts (pages, forms, journey, rules).",ai_generate_onboarding_app,AI Builder,Portal
+View onboarding apps list,Onboarding Apps,List onboarding apps the organisation has created.,view_onboarding_apps_list,Apps,Portal
+Create onboarding app,Onboarding Apps,Create a new onboarding app with the default legacy template.,create_onboarding_app,Apps,Portal
+Update onboarding app,Onboarding Apps,Edit draft onboarding app settings and content.,update_onboarding_app,Apps,Portal
+Manage onboarding app forms,Onboarding Apps,"Create, edit, and delete forms in an onboarding app library.",manage_onboarding_app_forms,Forms,Portal
+Manage onboarding app flow,Onboarding Apps,Edit the visual journey flow for an onboarding app.,manage_onboarding_app_flow,Flow,Portal
+Manage onboarding app rules,Onboarding Apps,"Configure journey rules, visibility, entry conditions, and webhooks for an onboarding app.",manage_onboarding_app_rules,Rules,Portal
+Publish onboarding app,Onboarding Apps,Publish staged onboarding app changes to the public /apps/{slug} runtime.,publish_onboarding_app,Apps,Portal
+Delete onboarding app,Onboarding Apps,Permanently delete an onboarding app.,delete_onboarding_app,Apps,Portal
+Convert legacy page to app,Onboarding Apps,Convert a legacy onboarding page into a draft onboarding app and rollback before publish.,convert_onboarding_page_to_app,Conversion,Portal
+View campaigns,Sales Pipe,"List and open campaigns, enrolments, sends, and outcomes.",campaigns_read,Campaigns,Portal
+Create and edit campaigns,Sales Pipe,Create drafts and edit campaign configuration.,campaigns_write,Campaigns,Portal
+Activate campaigns,Sales Pipe,Activate campaigns so Machine-Runner can enrol and send.,campaigns_activate,Campaigns,Portal
+Pause campaigns,Sales Pipe,Pause active campaigns.,campaigns_pause,Campaigns,Portal
+Archive campaigns,Sales Pipe,Archive campaigns.,campaigns_archive,Campaigns,Portal
+View campaign enrolments,Sales Pipe,View enrolment lists and timelines.,campaigns_enrolments_read,Campaigns,Portal
+Manage enrolments,Sales Pipe,"Pause, resume, exit, or manually enrol organisations.",campaigns_enrolments_write,Campaigns,Portal
+View scheduled sends,Sales Pipe,View planned and completed sends for campaigns.,campaigns_sends_read,Campaigns,Portal
+View send outcomes,Sales Pipe,View delivery outcomes and attempts.,campaigns_outcomes_read,Campaigns,Portal
+Browse Mailgun templates,Sales Pipe,List cached Mailgun templates for message configuration.,campaigns_mailgun_read,Campaigns,Portal
+Refresh Mailgun templates,Sales Pipe,Force refresh of Mailgun template cache.,campaigns_mailgun_refresh,Campaigns,Portal
+View email templates,Sales Pipe,List and open org-scoped Sales Pipe email layouts.,email_templates_read,Campaigns,Portal
+Edit email templates,Sales Pipe,"Create, update, delete Sales Pipe email layouts and upload images.",email_templates_write,Campaigns,Portal
+View sender identities,Sales Pipe,"List and open org sender identities (from address, header/footer).",sender_identities_read,Campaigns,Portal
+Edit sender identities,Sales Pipe,"Create, update, and delete sender identities and set default.",sender_identities_write,Campaigns,Portal
+Access Cleared Station surface,Cleared Station,Enter the Cleared Station operational area in the portal.,station.surface.access,Surface,Portal
+View station dashboard,Cleared Station,See the station overview dashboard with live station status.,station.dashboard.view,Surface,Portal
+View active station sessions,Cleared Station,List active and recent station sessions.,station.sessions.view,Sessions,Portal
+View station session details,Cleared Station,"Open a station session to see customer, workflow, and timeline.",station.sessions.viewDetail,Sessions,Portal
+Force reset station session,Cleared Station,Force close an active station session and release the station lock.,station.sessions.forceReset,Sessions,Portal
+Cancel station session,Cleared Station,Cancel an in-progress station session.,station.sessions.cancel,Sessions,Portal
+View station session audit,Cleared Station,See the event timeline for a station session.,station.sessions.audit.view,Sessions,Portal
+View stations,Cleared Station,List configured kiosk stations for the organisation.,station.stations.view,Stations,Portal
+Create station,Cleared Station,Create a new kiosk station configuration.,station.stations.create,Stations,Portal
+Update station,Cleared Station,"Edit station settings, modes, and policies.",station.stations.update,Stations,Portal
+Disable station,Cleared Station,Disable a station so it cannot accept new sessions.,station.stations.disable,Stations,Portal
+Delete station,Cleared Station,Permanently delete or archive a station configuration.,station.stations.delete,Stations,Portal
+View station devices,Cleared Station,List tablets and browsers bound to stations.,station.devices.view,Devices,Portal
+Set up station device,Cleared Station,Register or pair a device with a station.,station.devices.setup,Devices,Portal
+Revoke station device,Cleared Station,Revoke a device token and disconnect it from a station.,station.devices.revoke,Devices,Portal
+Access station runtime,Cleared Station,Use the kiosk runtime or start foundation session APIs.,station.runtime.access,Runtime,Portal
+Use customer mode,Cleared Station,Run customer self-service mode on a station.,station.runtime.customerMode.use,Runtime,Portal
+Use merchant mode,Cleared Station,Run staff-assisted merchant mode on a station.,station.runtime.merchantMode.use,Runtime,Portal
+Bypass staff PIN,Cleared Station,Bypass staff PIN unlock when already authenticated with permission.,station.runtime.staffPin.bypass,Runtime,Portal
+View station workflows,Cleared Station,See onboarding pages exposed to stations.,station.workflows.view,Workflows,Portal
+Expose workflow to station,Cleared Station,Expose an onboarding page as a station workflow.,station.workflows.expose,Workflows,Portal
+Assign workflow to station,Cleared Station,Assign or reorder workflows on a specific station.,station.workflows.assign,Workflows,Portal
+Override station workflow settings,Cleared Station,Set kiosk-specific overrides for an exposed workflow.,station.workflows.overrideSettings,Workflows,Portal
+View station profiles,Cleared Station,See profiles onboarded through stations.,station.profiles.view,Profiles,Portal
+View sensitive station profile data,Cleared Station,View sensitive profile fields from station onboarding.,station.profiles.viewSensitive,Profiles,Portal
+Search station profiles,Cleared Station,"Search profiles by name, contact, or station session.",station.profiles.search,Profiles,Portal
+Export station profiles,Cleared Station,Export station profile data for reporting.,station.profiles.export,Profiles,Portal
+Use capture ID tool,Cleared Station,Start ID capture from merchant mode on a station.,station.captureId.use,Capture,Portal
+Use capture form tool,Cleared Station,Capture physical forms at a station.,station.captureForm.use,Capture,Portal
+Review captured form,Cleared Station,Review and approve OCR-extracted form data.,station.captureForm.review,Capture,Portal
+View form capture templates,Cleared Station,List form capture templates for stations.,station.captureForm.templates.view,Capture,Portal
+Create form capture template,Cleared Station,Create a new OCR form capture template.,station.captureForm.templates.create,Capture,Portal
+Update form capture template,Cleared Station,Edit form capture template fields and samples.,station.captureForm.templates.update,Capture,Portal
+Disable form capture template,Cleared Station,Deactivate a form capture template.,station.captureForm.templates.disable,Capture,Portal
+View station settings,Cleared Station,View Cleared Station organisation settings.,station.settings.view,Settings,Portal
+Update station settings,Cleared Station,Change Cleared Station organisation settings.,station.settings.update,Settings,Portal
+View station audit log,Cleared Station,View organisation-wide station audit activity.,station.audit.view,Audit,Portal
+View station reports,Cleared Station,View station operational reports.,station.reports.view,Reports,Portal
+Export station reports,Cleared Station,Export station session and onboarding reports.,station.reports.export,Reports,Portal
+View queue,Control Centre,See the case queue and list cases for the organisation.,cc_queue_view,Queue,Control Centre
+Manage queue,Control Centre,"Create cases from results, open workspace transitions, and other queue management actions.",cc_queue_manage,Queue,Control Centre
+View ID validation queue,Control Centre,"View the ID validation queue (pending, in progress, flagged, failed).",cc_id_validation_queue_view,ID Validation,Control Centre
+Validate ID queue items,Control Centre,Run CBS/manual validation and retry on ID validation queue items.,cc_id_validation_queue_validate,ID Validation,Control Centre
+Decide ID validation / deferred clear,Control Centre,Mark queue items valid/invalid (fraud reject) and request deferred clearance.,cc_id_validation_queue_decide,ID Validation,Control Centre
+View Initial Review Triage,Control Centre,View the Initial Review Triage queue and case detail.,cc_initial_review_triage_view,Initial Review,Control Centre
+Claim Initial Review cases,Control Centre,"Claim, release, and start Initial Review triage on assigned identity results.",cc_initial_review_triage_claim,Initial Review,Control Centre
+Assign Initial Review cases,Control Centre,Assign or reassign Initial Review triage to agents.,cc_initial_review_triage_assign,Initial Review,Control Centre
+Decide Initial Review,Control Centre,Advance or reject identity results from Initial Review Triage.,cc_initial_review_triage_decide,Initial Review,Control Centre
+View people,Control Centre,Search and list people in the Control Centre.,cc_people_view,People,Control Centre
+View requests,Control Centre,See verification and related requests lists.,cc_requests_view,Requests,Control Centre
+Manage requests,Control Centre,"Create or update requests, reminders, contact logs, and related actions.",cc_requests_manage,Requests,Control Centre
+View operations dashboard,Control Centre,"View operations dashboard metrics, attention signals, and performance trends.",cc_dashboard_view,Dashboard,Control Centre
+View pipeline review,Control Centre,"View global identity pipeline status, clearance speed stats, and case lookup for ops supervisors.",cc_pipeline_review_view,Supervisor,Control Centre
+View tasks,Control Centre,See the tasks / actions inbox.,cc_tasks_view,Tasks,Control Centre
+Manage tasks,Control Centre,Create and update tasks and actions.,cc_tasks_manage,Tasks,Control Centre
+View CourtHits,Control Centre,Access the CourtHits area when available.,cc_courthits_view,CourtHits,Control Centre
+Use ID Generator,Control Centre,"Use the ID generator tool (templates, generate).",cc_tools_id_generator,Tools,Control Centre
+Use Face Match,Control Centre,Use the face-match tool.,cc_tools_face_match,Tools,Control Centre
+Search assignees,Control Centre,Search organisation assignees for case assignment.,cc_assignees_search,Team,Control Centre
+Open case,Control Centre,"View a case record, snapshots, and linked request metadata.",cc_case_open,Case,Control Centre
+View closed cases,Control Centre,Include closed cases in queue search and confirm viewing a closed case in the workspace.,cc_case_view_closed,Case,Control Centre
+Update case,Control Centre,"Edit case fields, assign, change stage, soft-drop, record workspace open, link verification results, and income evidence v2 ops actions (`POST .../cases/:id/income-evidence-v2/...` aggregate, document, integrity routes).",cc_case_update,Case,Control Centre
+View screening hits,Control Centre,View screening hits attached to a case.,cc_case_screening_view,Case,Control Centre
+Rerun screening,Control Centre,Trigger a screening rerun for a case.,cc_case_screening_rerun,Case,Control Centre
+View case verification requests,Control Centre,View verification requests shown on a case.,cc_case_verification_requests_view,Case,Control Centre
+View case comments,Control Centre,Read comments and threads on a case.,cc_case_comments_view,Case,Control Centre
+Post case comments,Control Centre,Post comments on a case.,cc_case_comments_post,Case,Control Centre
+View case activity,Control Centre,View activity and audit entries for a case.,cc_case_activity_view,Case,Control Centre
+View contact messages,Control Centre,View contact-centre chats and messages linked to a case.,cc_case_contact_messages_view,Case,Control Centre
+Send contact messages,Control Centre,Send messages in contact-centre chats for a case.,cc_case_contact_messages_send,Case,Control Centre
+View trust score,Control Centre,View or compute trust-score previews for a case.,cc_case_trust_score_view,Case,Control Centre
+Read verification data (proxy),Control Centre,Read reports and data via Control Centre proxy routes (GET).,cc_verification_proxy_read,Verification,Control Centre
+Write verification actions (proxy),Control Centre,Submit decisions and mutations via Control Centre proxy routes (POST/PATCH).,cc_verification_proxy_write,Verification,Control Centre
+View journey maps,Control Centre,Browse verification results and journey map timelines across services.,cc_verification_journeys_view,Verification,Control Centre
+Manage infrastructure control plane,DevOps,"Promote blue/green slots, stop/start slots, and force-off draining slots from the control plane.",manage_infrastructure,Infrastructure,DevOps
+View DevOps projects,DevOps,"View Code projects, repositories, and related DevOps workspace content.",view_devops_projects,Code,DevOps
+Run DevOps actions,DevOps,"Execute deployment actions, pipelines, and coordinated deploy sessions.",run_devops_actions,Actions,DevOps

@@ -31,6 +31,9 @@ New to the Cleared API? Follow these steps:
 | **[Authentication](./authentication.md)** | API key generation, JWT tokens, and security best practices |
 | **[Registration](./registration.md)** | Complete registration and onboarding walkthrough |
 | **[Endpoints](./endpoints.md)** | Base URLs, request/response formats, pagination, and filtering |
+| **[Permissions](./permissions.md)** | Portal, Control Centre, and DevOps privilege catalog (roles & access control) |
+
+A spreadsheet export of the same catalog is available as **[permissions-catalog.csv](./permissions-catalog.csv)**.
 
 ---
 
