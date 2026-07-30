@@ -230,7 +230,7 @@ Export station reports,Cleared Station,Export station session and onboarding rep
 View queue,Control Centre,See the case queue and list cases for the organisation.,cc_queue_view,Queue,Control Centre
 Manage queue,Control Centre,"Create cases from results, open workspace transitions, and other queue management actions.",cc_queue_manage,Queue,Control Centre
 View ID validation queue,Control Centre,"View the ID validation queue (pending, in progress, flagged, failed).",cc_id_validation_queue_view,ID Validation,Control Centre
-Validate ID queue items,Control Centre,Run CBS/manual validation and retry on ID validation queue items.,cc_id_validation_queue_validate,ID Validation,Control Centre
+Validate ID queue items,Control Centre,Run manual validation and retry on ID validation queue items.,cc_id_validation_queue_validate,ID Validation,Control Centre
 Decide ID validation / deferred clear,Control Centre,Mark queue items valid/invalid (fraud reject) and request deferred clearance.,cc_id_validation_queue_decide,ID Validation,Control Centre
 View Initial Review Triage,Control Centre,View the Initial Review Triage queue and case detail.,cc_initial_review_triage_view,Initial Review,Control Centre
 Claim Initial Review cases,Control Centre,"Claim, release, and start Initial Review triage on assigned identity results.",cc_initial_review_triage_claim,Initial Review,Control Centre
