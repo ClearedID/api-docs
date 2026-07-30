@@ -31,6 +31,9 @@ New to the Cleared API? Follow these steps:
 | **[Authentication](./authentication.md)** | API key generation, JWT tokens, and security best practices |
 | **[Registration](./registration.md)** | Complete registration and onboarding walkthrough |
 | **[Endpoints](./endpoints.md)** | Base URLs, request/response formats, pagination, and filtering |
+| **[Permissions](./permissions.md)** | Portal, Control Centre, and DevOps privilege catalog (roles & access control) |
+
+A spreadsheet export of the same catalog is available as **[permissions-catalog.csv](./permissions-catalog.csv)**.
 
 ---
 
@@ -80,6 +83,7 @@ Create and manage verification requests sent to customers.
 |----------|-------------|
 | **[Initiate Verification](./initiate-verification.md)** | Complete guide to creating verification requests |
 | **[Manage Requests](./verification-requests-management.md)** | List, view, withdraw, and extend verification requests |
+| **[Merchant Users](./merchant-users.md)** | Find or create Cleared user accounts (`POST /api/v1/merchant/users/create`) |
 
 **Key Features**: Multi-service requests, automatic customer lookup, expiration management, in-person mode, request bundling
 
