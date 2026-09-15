@@ -1012,6 +1012,29 @@ Get detailed TRN verification result.
 
 ---
 
+#### 15b. Validate driver licence against CBS
+
+Validates the licence number on an **identity verification** report (`documentType: driverLicence`) against CBS **DrivingLicenseReport**.
+
+**Endpoint**: `POST /api/v1/merchant/identity/driver-licence/validate`
+
+**Request body**:
+```json
+{
+  "reportId": "507f1f77bcf86cd799439011",
+  "documentNumber": "112112188"
+}
+```
+
+- `reportId` (string, required) — Identity verification result `_id`.
+- `documentNumber` (string, optional) — Overrides the number on the report (spaces stripped). If omitted, the report’s `documentNumber` is used.
+
+**Success response** (200): `success`, `reportedDateOfBirth`, `driverLicenceReport` (e.g. `status`, `fullName`, `dateOfBirth`, `idNumber`, `expiryDate`, `issueDate`, `documentStatus`, `gender`, `country`, `addresses`). On failure, `driverLicenceReport` may include `status: "failed"`, `message`, or `blocked`.
+
+**Notes**: Requires **operations** role. Returns 400 if the report is not a driver licence or has no licence number.
+
+---
+
 #### 16. Validate TRN Against CBS
 
 Validate a TRN number against CBS (Credit Bureau Services) database.
