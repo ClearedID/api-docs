@@ -234,6 +234,9 @@ async function handleClearedOnboardingWebhook(rawBody, signatureHeader, secret) 
 | `reviewedAt` | ISO timestamp |
 | `reviewDurationMs` | Ops review duration in ms, or `null` |
 | `finalStatus` | Always `"pending"` |
+| `taxNumber` | When a 9-digit TRN can be resolved |
+| `idNumber` | Document / national ID number when known |
+| `dateOfBirth` | `YYYY-MM-DD` when known |
 
 ### How to consume
 
@@ -269,7 +272,10 @@ Branch on **`resubmissionRequired`** / **`nextCaseStatus`**, not only on `level`
     "resubmissionRequired": false,
     "reviewedAt": "2026-07-25T14:10:00.000Z",
     "finalStatus": "pending",
-    "reviewDurationMs": 120000
+    "reviewDurationMs": 120000,
+    "taxNumber": "123456789",
+    "idNumber": "A1234567",
+    "dateOfBirth": "1990-05-15"
   }
 }
 ```
@@ -411,9 +417,9 @@ This is a **terminal success** for the identity verification result. Your produc
 ### How to consume
 
 1. Confirm `eventName === "identityVerificationCleared"`.
-2. Read identity row under `verifications` (status / document type / dates when present).
+2. Read identity row under `verifications` (status / document type / dates / **`taxNumber`** / **`idNumber`** / **`dateOfBirth`** when present).
 3. Advance your application to the next gate (or complete IDV).
-4. Persist `resultId` / cleared timestamp for audit.
+4. Persist `resultId` / cleared timestamp / person identifiers for audit.
 
 ### Example envelope (abbreviated)
 
@@ -430,10 +436,18 @@ This is a **terminal success** for the identity verification result. Your produc
       "type": "identity",
       "status": "cleared",
       "documentType": "nationalIdCard",
-      "clearedAt": "2026-07-25T16:05:00.000Z"
+      "clearedAt": "2026-07-25T16:05:00.000Z",
+      "taxNumber": "123456789",
+      "idNumber": "A1234567",
+      "dateOfBirth": "1990-05-15",
+      "initialReviewStatus": "completed"
     }
   ],
-  "eventContext": {}
+  "eventContext": {
+    "taxNumber": "123456789",
+    "idNumber": "A1234567",
+    "dateOfBirth": "1990-05-15"
+  }
 }
 ```
 
@@ -446,6 +460,9 @@ async function onIdentityCleared(payload) {
     identityPhase: 'cleared',
     identityStatus: identity?.status,
     identityClearedAt: identity?.clearedAt || payload.eventOccurredAt,
+    taxNumber: identity?.taxNumber || payload.eventContext?.taxNumber,
+    idNumber: identity?.idNumber || payload.eventContext?.idNumber,
+    dateOfBirth: identity?.dateOfBirth || payload.eventContext?.dateOfBirth,
   });
 
   await maybeUnlockNextStep(appId); // your policy

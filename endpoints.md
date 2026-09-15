@@ -534,34 +534,23 @@ If the same idempotency key is used again within 24 hours, you'll receive the or
 
 ## Webhooks
 
-Configure webhooks to receive real-time notifications about verification events:
+Configure webhooks to receive real-time notifications about verification and signing events.
 
-**Webhook Events:**
-- `verification.completed` – Verification completed
-- `verification.failed` – Verification failed
-- `verification.expired` – Verification expired
-- `document.signed` – Document signed
-- `background.check.completed` – Background check completed
+**Onboarding (IDV) — camelCase `eventName` (selected):**
+- `identityVerificationStarted` / `identityVerificationSubmitted`
+- `initialReviewCompleted` / `dueDiligenceStarted`
+- `identityVerificationCleared` / `identityVerificationRejected` / `identityVerificationApproved`
+- `verificationRequestApproved`
+
+Identity rows and cleared / IR `eventContext` may include **`taxNumber`**, **`idNumber`**, and **`dateOfBirth`** when known. Correlation ids live under `onboarding.urlParameters`.
+
+**Document signing — snake_case `event`:** e.g. `document_signed` (see document webhooks guide).
 
 **Configuration:**
-1. Go to Admin Portal > Integrations > Webhooks
-2. Add webhook endpoint URL
-3. Select events to receive
-4. Verify webhook signature
-
-**Webhook Payload:**
-```json
-{
-  "event": "verification.completed",
-  "timestamp": "2025-10-19T12:00:00Z",
-  "data": {
-    "verificationId": "verification_id",
-    "status": "verified",
-    "result": {...}
-  },
-  "signature": "sha256=..."
-}
-```
+1. Cleared Verification portal → Webhooks (or onboarding page / document bindings)
+2. Add HTTPS endpoint URL and secret
+3. Optionally whitelist `subscribedEvents`
+4. Verify `X-Webhook-Signature` (HMAC-SHA256 of the raw JSON body)
 
 **Documentation:** [Identity verification workflow](./identity/identity-verification-workflow.md) · [Onboarding (IDV) webhooks](./onboarding/onboarding-webhooks.md) · [Document signing webhooks](./document-signatures/document-webhooks.md)
 

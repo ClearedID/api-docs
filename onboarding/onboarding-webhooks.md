@@ -43,6 +43,25 @@ Typical body fields:
 | `eventContext` | Event-specific object (see deep dive below) |
 | `eventOccurredAt` | ISO 8601 timestamp |
 
+#### `verifications[]` — identity row fields
+
+When a row has `type: "identity"`, Cleared includes status fields plus person identifiers resolved from the latest identity result (and tax number fallbacks) at **delivery** time:
+
+| Field | When present | Notes |
+|-------|----------------|-------|
+| `documentType` | When known on the identity result | e.g. passport, driver licence |
+| `clearedAt` / `expiresAt` | When known | ISO 8601 |
+| `taxNumber` | When a 9-digit Jamaica TRN can be resolved | From identity TRN metadata, else the user’s unique id, else a TRN verification result |
+| `idNumber` | When known | From `documentInfo.idNumber` (or non-TRN `documentNumber`) — the **document / national ID number**, not the tax number |
+| `dateOfBirth` | When known | `YYYY-MM-DD` from the identity biography |
+| `initialReviewStatus` | Always on identity rows | `completed` or `pending` |
+
+TRN verification rows (`type: "trn"`) also expose `taxNumber` when available.
+
+#### `onboarding.urlParameters`
+
+Configured landing / link query keys captured when the subject starts the flow (stored on the verification request). Empty maps are omitted. Progress events such as `identityVerificationStarted` are pinned to the **flow** verification request when the client sends that request id, so the first webhook can include these parameters for the current visit.
+
 **Verification:** recompute HMAC-SHA256 on the raw request body and compare with `X-Webhook-Signature` (value after `sha256=`). If invalid, respond with 401.
 
 ## Event catalog (selected)
@@ -51,9 +70,11 @@ All onboarding event names use **camelCase**. Below are common decision / IR eve
 
 | Event | Category | When Cleared sends it |
 |-------|----------|------------------------|
+| `identityVerificationStarted` | progress | Customer starts identity capture for a flow request (pinned to that request so `onboarding.urlParameters` match the visit) |
+| `identityVerificationSubmitted` | progress | Identity documents submitted |
 | `initialReviewCompleted` | decisions | Ops completes **Initial Review** (triage advance or legacy mark-complete). **Not** sent on IR reject. **Does not** start due diligence. |
 | `dueDiligenceStarted` | decisions | Ops starts **due diligence** after Initial Review (separate Start due diligence action). |
-| `identityVerificationCleared` | decisions | Identity cleared by ops |
+| `identityVerificationCleared` | decisions | Identity cleared by ops (or ensured on consent share of an already-cleared result) |
 | `identityVerificationRejected` | decisions | Identity rejected by ops |
 | `identityVerificationApproved` | decisions | Customer / share approval path for identity |
 | `verificationRequestApproved` | session | Verification request approved for share |
@@ -81,8 +102,11 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `reviewedAt` | ISO string |
 | `finalStatus` | Always `"pending"` |
 | `reviewDurationMs` | number or `null` |
+| `taxNumber` | When resolvable — same rules as the identity `verifications[]` row |
+| `idNumber` | When known on the identity result biography / document info |
+| `dateOfBirth` | When known — `YYYY-MM-DD` |
 
-**Never** included: ops `internalNotes`, full document numbers, or other PII beyond what the VerificationStatus envelope already exposes.
+**Never** included: ops `internalNotes`, or other PII beyond the envelope + the person fields above. Document / tax numbers appear only as the dedicated `idNumber` / `taxNumber` fields (not as free-form notes).
 
 ### Example `eventContext` (triage advance)
 
@@ -100,7 +124,39 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
   "resubmissionRequired": false,
   "reviewedAt": "2026-07-24T12:00:00.000Z",
   "finalStatus": "pending",
-  "reviewDurationMs": 180000
+  "reviewDurationMs": 180000,
+  "taxNumber": "123456789",
+  "idNumber": "A1234567",
+  "dateOfBirth": "1990-05-15"
+}
+```
+
+## Deep dive: `identityVerificationCleared`
+
+Emitted when ops **clears** identity (final clear path). The VerificationStatus envelope’s identity row and `eventContext` both carry person identifiers when available.
+
+### `eventContext` person fields
+
+| Field | Rule |
+|-------|------|
+| `taxNumber` | When a 9-digit TRN can be resolved (identity metadata → user unique id → TRN verification) |
+| `idNumber` | Document / national ID number from the identity result when present |
+| `dateOfBirth` | `YYYY-MM-DD` when present on the biography |
+
+Same fields appear on the matching `verifications[]` identity row for this and other lifecycle events delivered via the VerificationStatus payload builder.
+
+### Example identity row snippet
+
+```json
+{
+  "type": "identity",
+  "status": "cleared",
+  "documentType": "passport",
+  "clearedAt": "2026-09-15T12:00:00.000Z",
+  "taxNumber": "123456789",
+  "idNumber": "A1234567",
+  "dateOfBirth": "1990-05-15",
+  "initialReviewStatus": "completed"
 }
 ```
 

@@ -1,11 +1,11 @@
 # Active context — api-docs
 
-## Current (Jul 2026)
+## Current (Sep 2026)
 
-**IDV workflow guide:** `identity/identity-verification-workflow.md` — stage-by-stage client webhooks; defines Initial Review as preliminary clearance (not final clear/reject); IR ≠ due diligence.
+**Onboarding webhooks:** `onboarding/onboarding-webhooks.md` — HMAC, identity person fields (`taxNumber` / `idNumber` / `dateOfBirth`), Started URL-param pin, IR / DD / cleared deep dives.
 
-**Phase 3:** `onboarding/onboarding-webhooks.md` — HMAC, IR / DD deep dives, action→event matrix. Subscribe via **Verification portal**.
+**IDV workflow guide:** `identity/identity-verification-workflow.md` — stage examples include person fields on IR and cleared.
 
 ## Related
 
-Workspace Pattern Lock: `../memory-bank/systemPatterns.md` (Initial Review Triage section).
+Workspace Pattern Lock / gateway `docs/onboarding-webhook-trace.md` for delivery implementation.
