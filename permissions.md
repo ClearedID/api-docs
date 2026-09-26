@@ -14,7 +14,7 @@ This reference lists the privilege identifiers used for **roles and access contr
 
 ## Portal
 
-_228 permissions_
+_232 permissions_
 
 ### Admin
 
