@@ -241,7 +241,7 @@ Example payload shape:
 
 Read the name currently used for messages, and request a different one. A request is reviewed before it is used. You can have one name in use and one request under review. A new request is refused while one is already under review.
 
-Only an approved name is used when sending. If none is approved, messages use the standard name.
+Only an approved name is used when sending. If none is approved, the send is refused and no message is sent.
 
 A name is 3–11 characters, starts with a letter, and uses letters and digits only (`Cleared`, `AcmeCo`). It must differ from the name already in use.
 
@@ -283,6 +283,7 @@ Scope: `sms:sender:manage`.
 | `SMS_SENDER_INVALID` | 400 | Name does not match the format |
 | `SMS_SENDER_UNCHANGED` | 400 | Same as the name already in use |
 | `SMS_SENDER_PENDING` | 409 | A request is already under review |
+| `SMS_SENDER_REQUIRED` | 409 | No approved sender name. The message is not sent |
 
 ## Error codes (selected)
 
@@ -303,6 +304,7 @@ Scope: `sms:sender:manage`.
 | `SMS_SENDER_INVALID` | Sender name format is not allowed |
 | `SMS_SENDER_UNCHANGED` | Sender name matches the one already in use |
 | `SMS_SENDER_PENDING` | A sender name is already under review |
+| `SMS_SENDER_REQUIRED` | No approved sender name. The message is not sent |
 | `SMS_OTP_REQUIRED` | `otp` field required for OTP message type |
 | `SMS_MESSAGE_NOT_FOUND` | Unknown `requestId` for this organisation |
 
