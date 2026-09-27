@@ -154,6 +154,18 @@ Successful response is usually **202 Accepted**:
 
 The rendered message after substitution must be **≤ 140 characters** or the API returns `SMS_RENDERED_MESSAGE_TOO_LONG`.
 
+An accepted message uses credits from the organisation balance. The price follows the organisation’s service prices. When the balance is not enough, the API returns **402** and does not send:
+
+```json
+{
+  "success": false,
+  "error": "insufficient_credits",
+  "message": "You do not have enough credits to send this message."
+}
+```
+
+A later retry of a message that was already accepted does not use credits again. A retry after a failed send uses credits only when that later attempt is accepted.
+
 Legacy path `POST /api/v1/merchant/sms/otp` is accepted and behaves the same as `/sms/messages`.
 
 ## Retrying a message
@@ -282,6 +294,7 @@ Scope: `sms:sender:manage`.
 | `SMS_DESTINATION_NOT_ALLOWED` | Prefix not allowed |
 | `SMS_RATE_LIMIT_EXCEEDED` | Velocity / circuit limit |
 | `SMS_ORGANISATION_DISABLED` | Org SMS messaging turned off |
+| `insufficient_credits` | Not enough credits to send (HTTP 402). The message is not sent |
 | `SMS_DELIVERY_UNAVAILABLE` | Messaging temporarily unable to send or retry |
 | `SMS_RENDERED_MESSAGE_TOO_LONG` | Rendered body > 140 chars |
 | `SMS_TEMPLATE_MISSING_OTP` | OTP template lacks `{{otp}}` |
