@@ -27,6 +27,7 @@ Authenticate with a Merchant API key or portal session. Required scopes (API key
 | `sms:messages:read` | `sms_messages_read` | List / get messages |
 | `sms:templates:read` | `sms_templates_read` | List templates |
 | `sms:templates:manage` | `sms_templates_manage` | Create / update / archive / delete templates |
+| `sms:sender:manage` | `sms_sender_manage` | Request a sender name |
 
 Legacy scopes `sms:otp:send` / `sms:otp:read` map to the same message send/read privileges.
 
@@ -224,6 +225,53 @@ Example payload shape:
 }
 ```
 
+## Sender name
+
+Read the name currently used for messages, and request a different one. A request is reviewed before it is used. You can have one name in use and one request under review. A new request is refused while one is already under review.
+
+Only an approved name is used when sending. If none is approved, messages use the standard name.
+
+A name is 3–11 characters, starts with a letter, and uses letters and digits only (`Cleared`, `AcmeCo`). It must differ from the name already in use.
+
+### Read the sender name
+
+```http
+GET /api/v1/merchant/sms/sender
+```
+
+Anyone who can read messages or templates can call this. The response never includes older requests.
+
+```json
+{
+  "success": true,
+  "active": { "senderId": "Cleared", "status": "active" },
+  "pending": null,
+  "lastRejection": null
+}
+```
+
+`pending` is present only while a request is under review (`status`: `pending_review`). `lastRejection` is present only when there is no pending request and the latest decision was a rejection. It includes `senderId` and `reviewReason`.
+
+### Request a sender name
+
+```http
+POST /api/v1/merchant/sms/sender/requests
+```
+
+Scope: `sms:sender:manage`.
+
+```json
+{ "senderId": "AcmeCo" }
+```
+
+`201` returns `{ "success": true, "pending": { "senderId": "AcmeCo", "status": "pending_review" } }`.
+
+| Code | HTTP | Meaning |
+|------|------|---------|
+| `SMS_SENDER_INVALID` | 400 | Name does not match the format |
+| `SMS_SENDER_UNCHANGED` | 400 | Same as the name already in use |
+| `SMS_SENDER_PENDING` | 409 | A request is already under review |
+
 ## Error codes (selected)
 
 | Code | Meaning |
@@ -239,6 +287,9 @@ Example payload shape:
 | `SMS_TEMPLATE_MISSING_OTP` | OTP template lacks `{{otp}}` |
 | `SMS_TEMPLATE_OTP_NOT_ALLOWED` | Non-OTP template includes `{{otp}}` |
 | `SMS_TEMPLATE_TYPE_IMMUTABLE` | Cannot change `messageType` after create |
+| `SMS_SENDER_INVALID` | Sender name format is not allowed |
+| `SMS_SENDER_UNCHANGED` | Sender name matches the one already in use |
+| `SMS_SENDER_PENDING` | A sender name is already under review |
 | `SMS_OTP_REQUIRED` | `otp` field required for OTP message type |
 | `SMS_MESSAGE_NOT_FOUND` | Unknown `requestId` for this organisation |
 
@@ -256,6 +307,8 @@ Send the same `Idempotency-Key` for the same organisation to avoid duplicate SMS
 | `PUT` / `PATCH` | `/sms/templates/{templateId}` | `sms:templates:manage` |
 | `POST` | `/sms/templates/{templateId}/archive` | `sms:templates:manage` |
 | `DELETE` | `/sms/templates/{templateId}` | `sms:templates:manage` |
+| `GET` | `/sms/sender` | `sms:messages:read` or `sms:templates:read` or `sms:sender:manage` |
+| `POST` | `/sms/sender/requests` | `sms:sender:manage` |
 | `POST` | `/sms/messages` | `sms:messages:send` |
 | `GET` | `/sms/messages` | `sms:messages:read` |
 | `GET` | `/sms/messages/summary` | `sms:messages:read` |
