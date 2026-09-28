@@ -1,0 +1,6 @@
+# Agent / engineering process artefacts — never publish
+memory-bank/
+.release-notes/
+.product-update-history/
+release-notes-live.md
+.DS_Store
