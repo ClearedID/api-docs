@@ -8,13 +8,6 @@ Classify each message with `messageType`: `otp` | `notification` | `alert` | `re
 
 Merchant SMS API paths use the prefix `/api/v1/merchant/sms/…`.
 
-Related QA endpoints for inspecting sandbox SMS/email when live delivery is off:
-
-- `GET /api/v1/public/sandbox/sms`
-- `GET /api/v1/public/sandbox/emails`
-
-Those paths are separate from the Merchant SMS API documented below.
-
 ## Authentication and scopes
 
 Authenticate with a Merchant API key or portal session. Required scopes (API keys) / privileges (portal):
