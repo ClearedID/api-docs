@@ -1012,9 +1012,9 @@ Get detailed TRN verification result.
 
 ---
 
-#### 15b. Validate driver licence against CBS
+#### 15b. Validate driver licence
 
-Validates the licence number on an **identity verification** report (`documentType: driverLicence`) against CBS **DrivingLicenseReport**.
+Validates the licence number on an **identity verification** report (`documentType: driverLicence`).
 
 **Endpoint**: `POST /api/v1/merchant/identity/driver-licence/validate`
 
@@ -1035,9 +1035,9 @@ Validates the licence number on an **identity verification** report (`documentTy
 
 ---
 
-#### 16. Validate TRN Against CBS
+#### 16. Validate TRN
 
-Validate a TRN number against CBS (Credit Bureau Services) database.
+Validate a TRN number.
 
 **Endpoint**: `POST /api/v1/merchant/identity/trn/validate`
 
@@ -1090,9 +1090,8 @@ Validate a TRN number against CBS (Credit Bureau Services) database.
 ```
 
 **Notes**:
-- Queries CBS database for TRN information
-- Compares CBS data with ID verification data
-- Returns date of birth from ID for cross-validation
+- Looks up the TRN and compares it with the identity verification
+- Returns date of birth from the ID for cross-validation
 - If `trn = "id-check"`, automatically finds linked TRN for ID verification
 
 ---
@@ -1686,7 +1685,6 @@ Retrieve traffic tickets for a driver's licence number.
 
 **Notes**:
 - Requires `traffic-tickets-onboarding-team` role
-- Queries JCF (Jamaica Constabulary Force) system
 - Returns tickets with various statuses
 - Calculates total outstanding balance
 - Grants consent to view tickets automatically

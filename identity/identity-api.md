@@ -89,10 +89,10 @@ The system verifies ID documents using multiple checks:
 - Confidence scoring
 
 **Face Indexing**:
-- Index verified faces in AWS Rekognition
+- Index verified faces for later comparison
 - Enable duplicate detection
 - Cross-reference with existing verifications
-- Maintain face collection per country
+- Maintain a face collection per country
 
 ### 3. TRN Verification
 
@@ -103,11 +103,10 @@ When driver's licence or national ID is verified:
 - Links to identity verification
 - Marks as cleared automatically
 
-**CBS Integration**:
-- Query Credit Bureau Services (CBS) database
-- Validate TRN number
+**TRN record check**:
+- Validate the TRN number
 - Cross-check personal information
-- Return official TRN holder details
+- Return the holder details on the report
 
 **TRN Validation**:
 - Format validation (XXX-XXX-XXX)
@@ -132,8 +131,7 @@ When driver's licence or national ID is verified:
 - Alerts to potential identity fraud
 
 **Layer 3: Facial Matching**
-- Uses AWS Rekognition face search
-- Searches indexed face collection
+- Searches the indexed face collection
 - Returns similarity scores
 - Shows matched reports with photos
 
@@ -502,7 +500,7 @@ Exceeding limits returns `429 Too Many Requests` with retry-after header.
    - Review processing queue daily
    - Flag suspicious submissions for manual review
    - Validate document authenticity carefully
-   - Cross-check with CBS for TRN verification
+   - Cross-check the TRN on the verification
    - Monitor duplicate detection alerts
 
 2. **Duplicate Handling**
