@@ -96,11 +96,9 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `source` | `ops_initial_review_triage_advance` (triage advance) or `ops_initial_review_complete` (legacy mark-complete) |
 | `level` | `1` \| `2` \| `3`, or `null` (legacy mark-complete) |
 | `riskCategory` | Derived: `1→low`, `2→medium`, `3→high`, else `null` |
-| `reasonCodes` | string[] (may be empty) |
 | `caseStatus` | Actual identity result **status** after advance (`processing` / `flagged`, etc.) |
 | `nextCaseStatus` | Triage choice when available (`continue_review`, `awaiting_resubmission`, …). **Not** `due_diligence` — that is a separate Start due diligence action. |
-| `resubmissionRequired` | boolean |
-| `resubmission` | Present when required: `{ requestId, labels? }` — omitted when not required |
+| `resubmissionRequired` | boolean — when `true`, Cleared will contact the customer to resubmit; use **`identityResubmissionRequested`** (and reminders) for the client-safe resubmission signal |
 | `reviewedAt` | ISO string |
 | `finalStatus` | Always `"pending"` |
 | `reviewDurationMs` | number or `null` |
@@ -108,7 +106,7 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `idNumber` | When known on the identity result biography / document info |
 | `dateOfBirth` | When known — `YYYY-MM-DD` |
 
-Webhook payloads include the fields documented above. Person identifiers appear only as the dedicated `idNumber` / `taxNumber` / `dateOfBirth` fields (not as free-form notes).
+Webhook payloads include the fields documented above. Person identifiers appear only as the dedicated `idNumber` / `taxNumber` / `dateOfBirth` fields (not as free-form notes). `initialReviewCompleted` does **not** include reason codes, missing-media labels, internal request ids, or upload links.
 
 ### Example `eventContext` (triage advance)
 
@@ -120,7 +118,6 @@ Webhook payloads include the fields documented above. Person identifiers appear 
   "source": "ops_initial_review_triage_advance",
   "level": 2,
   "riskCategory": "medium",
-  "reasonCodes": ["blurry_photo"],
   "caseStatus": "processing",
   "nextCaseStatus": "continue_review",
   "resubmissionRequired": false,
@@ -308,3 +305,4 @@ Reminders do **not** include missing-media labels, reasons, notes, or retake lin
 ### November 2026
 
 - Documented onboarding webhook events **`identityResubmissionRequested`** and **`identityResubmissionReminderSent`** (catalogue, `eventContext`, and examples).
+- Aligned **`initialReviewCompleted`** client docs: removed `reasonCodes` and the `resubmission` object; kept `resubmissionRequired` and pointed integrators to **`identityResubmissionRequested`**.

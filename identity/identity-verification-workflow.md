@@ -234,11 +234,9 @@ async function handleClearedOnboardingWebhook(rawBody, signatureHeader, secret) 
 | `source` | e.g. `ops_initial_review_triage_advance` or `ops_initial_review_complete` |
 | `level` | `1`, `2`, `3`, or `null` (legacy mark-complete) |
 | `riskCategory` | `low` / `medium` / `high` from level, or `null` |
-| `reasonCodes` | Catalogue reason codes (may be `[]`) |
 | `caseStatus` | Underlying identity status after advance (e.g. `processing`) |
 | `nextCaseStatus` | Choice: `continue_review` or `awaiting_resubmission` (not due diligence) |
-| `resubmissionRequired` | `true` when customer must send more media |
-| `resubmission` | When required: `{ "requestId": "…", "labels": ["idFront", …] }` |
+| `resubmissionRequired` | `true` when triage requires customer resubmission — pair with **`identityResubmissionRequested`** for the actionable webhook (no labels or internal ids on IR) |
 | `reviewedAt` | ISO timestamp |
 | `reviewDurationMs` | Review duration in ms, or `null` |
 | `finalStatus` | Always `"pending"` |
@@ -253,7 +251,7 @@ Branch on **`resubmissionRequired`** / **`nextCaseStatus`**, not only on `level`
 | Condition | Recommended integrator behaviour |
 |-----------|----------------------------------|
 | `resubmissionRequired === false` and `nextCaseStatus === "continue_review"` | Keep waiting for final clear/reject (and possibly `dueDiligenceStarted`) |
-| `resubmissionRequired === true` | Mark application “awaiting customer ID re-upload”; do not clear the loan |
+| `resubmissionRequired === true` | Mark application “awaiting customer ID re-upload”; rely on **`identityResubmissionRequested`** for the same signal; do not clear the loan |
 | `level === 3` without due diligence yet | Higher risk signal only — **wait** for either clear/reject or `dueDiligenceStarted` |
 
 **Do not** treat `initialReviewCompleted` as cleared, rejected, or “due diligence started”.
@@ -274,7 +272,6 @@ Branch on **`resubmissionRequired`** / **`nextCaseStatus`**, not only on `level`
     "source": "ops_initial_review_triage_advance",
     "level": 1,
     "riskCategory": "low",
-    "reasonCodes": [],
     "caseStatus": "processing",
     "nextCaseStatus": "continue_review",
     "resubmissionRequired": false,
@@ -302,16 +299,13 @@ async function onInitialReviewCompleted(payload) {
       : 'initial_review_complete',
   });
 
-  if (ctx.resubmissionRequired) {
-    await notifyOpsOrCustomer(appId, {
-      reason: 'identity_resubmission_required',
-      labels: ctx.resubmission?.labels || [],
-    });
-  }
+  // IR does not include missing-media labels or upload links.
+  // When resubmissionRequired is true, handle customer action via identityResubmissionRequested
+  // (and identityResubmissionReminderSent for reminders).
 }
 ```
 
-### Example — resubmission requested (via Initial Review)
+### Example — IR triage with resubmission required
 
 ```json
 {
@@ -327,14 +321,9 @@ async function onInitialReviewCompleted(payload) {
     "source": "ops_initial_review_triage_advance",
     "level": 2,
     "riskCategory": "medium",
-    "reasonCodes": ["DOCUMENT_BLURRED"],
     "caseStatus": "processing",
     "nextCaseStatus": "awaiting_resubmission",
     "resubmissionRequired": true,
-    "resubmission": {
-      "requestId": "gs_abc123",
-      "labels": ["idFront", "idBack"]
-    },
     "reviewedAt": "2026-07-25T14:12:00.000Z",
     "finalStatus": "pending",
     "reviewDurationMs": 240000
@@ -342,7 +331,7 @@ async function onInitialReviewCompleted(payload) {
 }
 ```
 
-After the customer uploads again, expect another **`identityVerificationSubmitted`** (and later another review path). Keep correlating on `applicationId` / `resultId`.
+Expect a separate **`identityResubmissionRequested`** when Cleared asks the customer to resubmit. After the customer uploads again, expect another **`identityVerificationSubmitted`** (and later another review path). Keep correlating on `applicationId` / `resultId`.
 
 ---
 
