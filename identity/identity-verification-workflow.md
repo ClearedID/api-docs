@@ -337,7 +337,7 @@ Expect a separate **`identityResubmissionRequested`** when Cleared asks the cust
 
 ## Stage 2b — Identity resubmission requested
 
-**What happens:** Cleared asks the customer to resubmit identity photos or documents (reviewer or automated review). Cleared notifies every client that shares the verification result and has an onboarding webhook configured.
+**What happens:** Cleared asks the customer to resubmit identity photos or documents (reviewer or automated review).
 
 **Webhook:** `identityResubmissionRequested`
 

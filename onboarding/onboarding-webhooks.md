@@ -72,8 +72,8 @@ All onboarding event names use **camelCase**. Below are common decision / IR eve
 |-------|----------|------------------------|
 | `identityVerificationStarted` | progress | Customer starts identity capture for a flow request (pinned to that request so `onboarding.urlParameters` match the visit) |
 | `identityVerificationSubmitted` | progress | Identity documents submitted |
-| `identityResubmissionRequested` | progress | Cleared asks the customer to resubmit identity photos or documents for a verification (reviewer or automated review). Sent to every client the verification result is shared with that has an onboarding webhook configured. |
-| `identityResubmissionReminderSent` | progress | Cleared sends the customer a reminder about an outstanding identity resubmission request (separate from the original request). Same audience as `identityResubmissionRequested`. |
+| `identityResubmissionRequested` | progress | Cleared asks the customer to resubmit identity photos or documents for a verification (reviewer or automated review). |
+| `identityResubmissionReminderSent` | progress | Cleared sends the customer a reminder about an outstanding identity resubmission request (separate from the original request). |
 | `initialReviewCompleted` | decisions | Cleared completes **Initial Review** (triage advance or legacy mark-complete). **Not** sent on IR reject. **Does not** start due diligence. |
 | `dueDiligenceStarted` | decisions | Cleared starts **due diligence** after Initial Review (separate Start due diligence action). |
 | `identityVerificationCleared` | decisions | Identity cleared (or ensured on consent share of an already-cleared result) |
@@ -186,7 +186,7 @@ Emitted when an agent starts due diligence **after** Initial Review is complete.
 
 ## Deep dive: `identityResubmissionRequested`
 
-Emitted when Cleared asks the customer to resubmit identity photos or documents, whether the request comes from a Cleared reviewer or from automated review. Cleared delivers the event to every client that shares the verification result and has an onboarding webhook configured. Use this event (not internal ops identifiers) to mark your application as awaiting customer re-upload.
+Emitted when Cleared asks the customer to resubmit identity photos or documents, whether the request comes from a Cleared reviewer or from automated review. Use this event (not internal ops identifiers) to mark your application as awaiting customer re-upload.
 
 `eventContext.finalStatus` is always `"pending"`.
 
@@ -243,7 +243,7 @@ Payloads do **not** include which captures are missing, reasons, notes, upload l
 
 ## Deep dive: `identityResubmissionReminderSent`
 
-Emitted **each time** Cleared sends the customer a reminder about an outstanding identity resubmission request. This is separate from the original `identityResubmissionRequested` delivery. Audience and envelope match the request event.
+Emitted **each time** Cleared sends the customer a reminder about an outstanding identity resubmission request. This is separate from the original `identityResubmissionRequested` delivery. Envelope and client-safe field rules match the request event.
 
 `eventContext.finalStatus` is always `"pending"`.
 
