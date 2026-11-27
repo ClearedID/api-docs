@@ -72,6 +72,8 @@ All onboarding event names use **camelCase**. Below are common decision / IR eve
 |-------|----------|------------------------|
 | `identityVerificationStarted` | progress | Customer starts identity capture for a flow request (pinned to that request so `onboarding.urlParameters` match the visit) |
 | `identityVerificationSubmitted` | progress | Identity documents submitted |
+| `identityResubmissionRequested` | progress | Cleared asks the customer to resubmit identity photos or documents for a verification (reviewer or automated review). |
+| `identityResubmissionReminderSent` | progress | Cleared sends the customer a reminder about an outstanding identity resubmission request (separate from the original request). |
 | `initialReviewCompleted` | decisions | Cleared completes **Initial Review** (triage advance or legacy mark-complete). **Not** sent on IR reject. **Does not** start due diligence. |
 | `dueDiligenceStarted` | decisions | Cleared starts **due diligence** after Initial Review (separate Start due diligence action). |
 | `identityVerificationCleared` | decisions | Identity cleared (or ensured on consent share of an already-cleared result) |
@@ -94,11 +96,9 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `source` | `ops_initial_review_triage_advance` (triage advance) or `ops_initial_review_complete` (legacy mark-complete) |
 | `level` | `1` \| `2` \| `3`, or `null` (legacy mark-complete) |
 | `riskCategory` | Derived: `1→low`, `2→medium`, `3→high`, else `null` |
-| `reasonCodes` | string[] (may be empty) |
 | `caseStatus` | Actual identity result **status** after advance (`processing` / `flagged`, etc.) |
 | `nextCaseStatus` | Triage choice when available (`continue_review`, `awaiting_resubmission`, …). **Not** `due_diligence` — that is a separate Start due diligence action. |
-| `resubmissionRequired` | boolean |
-| `resubmission` | Present when required: `{ requestId, labels? }` — omitted when not required |
+| `resubmissionRequired` | boolean — when `true`, Cleared will contact the customer to resubmit; use **`identityResubmissionRequested`** (and reminders) for the client-safe resubmission signal |
 | `reviewedAt` | ISO string |
 | `finalStatus` | Always `"pending"` |
 | `reviewDurationMs` | number or `null` |
@@ -106,7 +106,7 @@ Emitted when Initial Review is **advanced** (or legacy mark-complete), while fin
 | `idNumber` | When known on the identity result biography / document info |
 | `dateOfBirth` | When known — `YYYY-MM-DD` |
 
-Webhook payloads include the fields documented above. Person identifiers appear only as the dedicated `idNumber` / `taxNumber` / `dateOfBirth` fields (not as free-form notes).
+Webhook payloads include the fields documented above. Person identifiers appear only as the dedicated `idNumber` / `taxNumber` / `dateOfBirth` fields (not as free-form notes). `initialReviewCompleted` does **not** include reason codes, missing-media labels, internal request ids, or upload links.
 
 ### Example `eventContext` (triage advance)
 
@@ -118,7 +118,6 @@ Webhook payloads include the fields documented above. Person identifiers appear 
   "source": "ops_initial_review_triage_advance",
   "level": 2,
   "riskCategory": "medium",
-  "reasonCodes": ["blurry_photo"],
   "caseStatus": "processing",
   "nextCaseStatus": "continue_review",
   "resubmissionRequired": false,
@@ -185,8 +184,125 @@ Emitted when an agent starts due diligence **after** Initial Review is complete.
 | `startedAt` | ISO string |
 | `finalStatus` | Always `"pending"` |
 
+## Deep dive: `identityResubmissionRequested`
+
+Emitted when Cleared asks the customer to resubmit identity photos or documents, whether the request comes from a Cleared reviewer or from automated review. Use this event (not internal ops identifiers) to mark your application as awaiting customer re-upload.
+
+`eventContext.finalStatus` is always `"pending"`.
+
+### `eventContext` fields
+
+| Field | Rule |
+|-------|------|
+| `resultType` / `verificationType` / `resultId` | Always present |
+| `requestedAt` | ISO string — when Cleared requested resubmission |
+| `finalStatus` | Always `"pending"` |
+| `taxNumber` | When resolvable — same rules as the identity `verifications[]` row |
+| `idNumber` | When known on the identity result biography / document info |
+| `dateOfBirth` | When known — `YYYY-MM-DD` |
+
+Payloads do **not** include which captures are missing, reasons, notes, upload links, or who initiated the request.
+
+### Example payload
+
+```json
+{
+  "topic": "VerificationStatus",
+  "customerName": "Jane Doe",
+  "customerEmailAddress": "jane@example.com",
+  "verifications": [
+    {
+      "type": "identity",
+      "status": "processing",
+      "documentType": "passport",
+      "initialReviewStatus": "completed",
+      "taxNumber": "123456789",
+      "idNumber": "A1234567",
+      "dateOfBirth": "1990-05-15"
+    }
+  ],
+  "onboarding": {
+    "pageId": "page_abc",
+    "onboardingPageId": "page_abc",
+    "urlParameters": { "applicationId": "LOAN-10042" }
+  },
+  "eventName": "identityResubmissionRequested",
+  "eventContext": {
+    "resultType": "IdentityVerificationResult",
+    "verificationType": "identity",
+    "resultId": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "requestedAt": "2026-07-26T09:00:00.000Z",
+    "finalStatus": "pending",
+    "taxNumber": "123456789",
+    "idNumber": "A1234567",
+    "dateOfBirth": "1990-05-15"
+  },
+  "eventOccurredAt": "2026-07-26T09:00:00.000Z"
+}
+```
+
+## Deep dive: `identityResubmissionReminderSent`
+
+Emitted **each time** Cleared sends the customer a reminder about an outstanding identity resubmission request. This is separate from the original `identityResubmissionRequested` delivery. Envelope and client-safe field rules match the request event.
+
+`eventContext.finalStatus` is always `"pending"`.
+
+### `eventContext` fields
+
+| Field | Rule |
+|-------|------|
+| `resultType` / `verificationType` / `resultId` | Always present |
+| `reminderNumber` | Positive integer — sequence for this resubmission request (`1` = first reminder after the original request) |
+| `reminderSentAt` | ISO string — when Cleared sent this reminder |
+| `finalStatus` | Always `"pending"` |
+| `taxNumber` | When resolvable — same rules as the identity `verifications[]` row |
+| `idNumber` | When known on the identity result biography / document info |
+| `dateOfBirth` | When known — `YYYY-MM-DD` |
+
+Reminders do **not** include missing-media labels, reasons, notes, or retake links.
+
+### Example payload
+
+```json
+{
+  "topic": "VerificationStatus",
+  "customerName": "Jane Doe",
+  "customerEmailAddress": "jane@example.com",
+  "verifications": [
+    {
+      "type": "identity",
+      "status": "processing",
+      "documentType": "passport",
+      "initialReviewStatus": "completed"
+    }
+  ],
+  "onboarding": {
+    "pageId": "page_abc",
+    "onboardingPageId": "page_abc",
+    "urlParameters": { "applicationId": "LOAN-10042" }
+  },
+  "eventName": "identityResubmissionReminderSent",
+  "eventContext": {
+    "resultType": "IdentityVerificationResult",
+    "verificationType": "identity",
+    "resultId": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "reminderNumber": 2,
+    "reminderSentAt": "2026-07-28T14:00:00.000Z",
+    "finalStatus": "pending"
+  },
+  "eventOccurredAt": "2026-07-28T14:00:00.000Z"
+}
+```
+
 ## Related
 
 - [Client loan / onboarding workflow](../client-loan-application-workflow.md) — end-to-end IDV + webhooks
 - [Document signing webhooks](../document-signatures/document-webhooks.md) — snake_case signing events
 - [API endpoints overview](../endpoints.md) — webhooks section
+
+## Changelog
+
+### November 2026
+
+- Documented onboarding webhook events **`identityResubmissionRequested`** and **`identityResubmissionReminderSent`** (catalogue, `eventContext`, and examples).
+- Aligned **`initialReviewCompleted`** client docs: removed `reasonCodes` and the `resubmission` object; kept `resubmissionRequired` and pointed integrators to **`identityResubmissionRequested`**.
