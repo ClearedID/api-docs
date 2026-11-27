@@ -74,6 +74,8 @@ All onboarding webhook `eventName` values are **camelCase**. Cleared may also se
 |-------|---------------------|-----------|---------------------------|
 | Customer submitted / journey progress | `identityVerificationSubmitted` (and related progress events) | No | Mark application “ID received / in review” |
 | Initial Review completed | `initialReviewCompleted` | No | Store assurance level; branch on resubmission vs continue |
+| Identity resubmission requested | `identityResubmissionRequested` | No | Mark “awaiting customer ID re-upload”; do not clear the loan |
+| Identity resubmission reminder | `identityResubmissionReminderSent` | No | Optional nudge to ops/UI; customer still owes resubmission |
 | Due diligence started | `dueDiligenceStarted` | No | Mark “enhanced review”; do **not** treat as cleared |
 | Identity cleared | `identityVerificationCleared` | **Yes** (success) | Unlock loan / proceed |
 | Identity rejected | `identityVerificationRejected` | **Yes** (failure) | Stop / ask customer to restart per your policy |
@@ -84,7 +86,7 @@ All onboarding webhook `eventName` values are **camelCase**. Cleared may also se
 >
 > Cleared does **not** send bare `cleared` or `rejected` as `eventName`. Matching on those strings will miss the event.
 
-> **Resubmission:** There is **no** catalogue event named `resubmissionInitiated` or `resubmissionCompleted`. When Cleared requests new media after Initial Review, Cleared signals that on **`initialReviewCompleted`** with `eventContext.resubmissionRequired: true` (and usually `nextCaseStatus: "awaiting_resubmission"`). The customer is contacted by Cleared to upload again; when they re-submit, you typically see another **`identityVerificationSubmitted`** (and later a new decision path).
+> **Resubmission:** There is **no** catalogue event named `resubmissionInitiated` or `resubmissionCompleted`. When Cleared asks the customer to resubmit identity media, you receive **`identityResubmissionRequested`** (each new request, including after Initial Review or later in the lifecycle). Cleared may also send **`identityResubmissionReminderSent`** for each reminder about an outstanding request. Separately, **`initialReviewCompleted`** may still include `resubmissionRequired: true` when resubmission is chosen during Initial Review triage — see [Onboarding webhooks — `initialReviewCompleted`](../onboarding/onboarding-webhooks.md#deep-dive-initialreviewcompleted). When the customer uploads again, you typically see another **`identityVerificationSubmitted`** (and later a new decision path).
 
 Subscribe via the **Verification portal** webhook binding (optional `subscribedEvents` whitelist). Unset / omit the list to receive all catalogue events. Details: [Onboarding webhooks — Configuration](../onboarding/onboarding-webhooks.md#configuration).
 
@@ -145,6 +147,12 @@ async function handleClearedOnboardingWebhook(rawBody, signatureHeader, secret) 
       break;
     case 'initialReviewCompleted':
       await onInitialReviewCompleted(payload);
+      break;
+    case 'identityResubmissionRequested':
+      await onIdentityResubmissionRequested(payload);
+      break;
+    case 'identityResubmissionReminderSent':
+      await onIdentityResubmissionReminder(payload);
       break;
     case 'dueDiligenceStarted':
       await onDueDiligenceStarted(payload);
@@ -338,6 +346,122 @@ After the customer uploads again, expect another **`identityVerificationSubmitte
 
 ---
 
+## Stage 2b — Identity resubmission requested
+
+**What happens:** Cleared asks the customer to resubmit identity photos or documents (reviewer or automated review). Cleared notifies every client that shares the verification result and has an onboarding webhook configured.
+
+**Webhook:** `identityResubmissionRequested`
+
+### `eventContext` fields
+
+| Field | Meaning |
+|-------|---------|
+| `resultId` | Identity verification result id |
+| `verificationType` | `"identity"` |
+| `requestedAt` | When Cleared requested resubmission (ISO) |
+| `finalStatus` | Always `"pending"` |
+| `taxNumber` | When a 9-digit TRN can be resolved |
+| `idNumber` | Document / national ID number when known |
+| `dateOfBirth` | `YYYY-MM-DD` when known |
+
+The payload does **not** list missing captures, reasons, upload links, or internal request ids.
+
+### How to consume
+
+1. Set application phase to `awaiting_customer_resubmission` (or equivalent).
+2. Do **not** treat the event as cleared or rejected.
+3. Optionally surface “action required” in your UI; Cleared contacts the customer directly.
+
+### Example
+
+```json
+{
+  "eventName": "identityResubmissionRequested",
+  "eventOccurredAt": "2026-07-26T09:00:00.000Z",
+  "onboarding": {
+    "urlParameters": { "applicationId": "LOAN-10042" }
+  },
+  "verifications": [
+    {
+      "type": "identity",
+      "status": "processing",
+      "documentType": "passport",
+      "initialReviewStatus": "completed"
+    }
+  ],
+  "eventContext": {
+    "resultType": "IdentityVerificationResult",
+    "verificationType": "identity",
+    "resultId": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "requestedAt": "2026-07-26T09:00:00.000Z",
+    "finalStatus": "pending",
+    "taxNumber": "123456789",
+    "idNumber": "A1234567",
+    "dateOfBirth": "1990-05-15"
+  }
+}
+```
+
+```javascript
+async function onIdentityResubmissionRequested(payload) {
+  const appId = payload.onboarding?.urlParameters?.applicationId;
+  const ctx = payload.eventContext || {};
+
+  await updateApplication(appId, {
+    identityResultId: ctx.resultId,
+    identityPhase: 'awaiting_customer_resubmission',
+    identityResubmissionRequestedAt: ctx.requestedAt,
+  });
+}
+```
+
+---
+
+## Stage 2c — Identity resubmission reminder
+
+**What happens:** Cleared sends the customer a **reminder** about an outstanding resubmission request. This is a separate delivery from the original `identityResubmissionRequested` event — one webhook per reminder.
+
+**Webhook:** `identityResubmissionReminderSent`
+
+### `eventContext` fields
+
+| Field | Meaning |
+|-------|---------|
+| `resultId` | Identity verification result id |
+| `verificationType` | `"identity"` |
+| `reminderNumber` | Sequence for this resubmission cycle (`1` = first reminder after the original request) |
+| `reminderSentAt` | When Cleared sent this reminder (ISO) |
+| `finalStatus` | Always `"pending"` |
+| `taxNumber` / `idNumber` / `dateOfBirth` | When known — same rules as other identity events |
+
+### How to consume
+
+1. Keep phase at `awaiting_customer_resubmission` unless you already moved on via a later event.
+2. Use `reminderNumber` for idempotency (`eventName` + `resultId` + `reminderNumber` + `reminderSentAt`).
+3. Optional ops/dashboard signal — not a terminal or cleared state.
+
+### Example
+
+```json
+{
+  "eventName": "identityResubmissionReminderSent",
+  "eventOccurredAt": "2026-07-28T14:00:00.000Z",
+  "onboarding": {
+    "urlParameters": { "applicationId": "LOAN-10042" }
+  },
+  "eventContext": {
+    "resultType": "IdentityVerificationResult",
+    "verificationType": "identity",
+    "resultId": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "reminderNumber": 2,
+    "reminderSentAt": "2026-07-28T14:00:00.000Z",
+    "finalStatus": "pending"
+  }
+}
+```
+
+---
+
 ## Stage 3 — Due diligence started
 
 **What happens:** After Initial Review, an agent may start **enhanced due diligence** (extended evidence review). This is a **separate** action from Initial Review.
@@ -516,6 +640,8 @@ none
   → (identityVerificationSubmitted) → submitted
   → (initialReviewCompleted, no resub) → initial_review_complete
   → (initialReviewCompleted, resubmissionRequired) → awaiting_customer_resubmission
+  → (identityResubmissionRequested) → awaiting_customer_resubmission
+  → (identityResubmissionReminderSent) → awaiting_customer_resubmission   // optional repeats
        → (identityVerificationSubmitted) → submitted   // loop
   → (dueDiligenceStarted) → due_diligence
   → (identityVerificationCleared) → cleared            // terminal success
@@ -525,7 +651,7 @@ none
 Rules of thumb:
 
 1. Only **`identityVerificationCleared`** and **`identityVerificationRejected`** are terminal for identity.
-2. **`initialReviewCompleted`** and **`dueDiligenceStarted`** always leave you **pending**.
+2. **`initialReviewCompleted`**, **`identityResubmissionRequested`**, **`identityResubmissionReminderSent`**, and **`dueDiligenceStarted`** always leave you **pending**.
 3. Out-of-order / duplicate deliveries: use idempotency keys; prefer the latest terminal event for a given `resultId` if you ever see both (should be rare).
 
 ---
@@ -538,6 +664,8 @@ If you only care about the identity decision path:
 [
   "identityVerificationSubmitted",
   "initialReviewCompleted",
+  "identityResubmissionRequested",
+  "identityResubmissionReminderSent",
   "dueDiligenceStarted",
   "identityVerificationCleared",
   "identityVerificationRejected"
@@ -556,7 +684,7 @@ Omit the list entirely if you want the full catalogue (including other verificat
 | Treat `dueDiligenceStarted` as cleared | Wait for clear/reject |
 | Assume Initial Review “includes” due diligence | Separate events; DD is after IR |
 | Match on `eventName` values `cleared` or `rejected` | Match **exactly** `identityVerificationCleared` / `identityVerificationRejected` |
-| Expect `resubmissionInitiated` / `resubmissionCompleted` | Use IR `resubmissionRequired` + later `identityVerificationSubmitted` |
+| Expect `resubmissionInitiated` / `resubmissionCompleted` | Use `identityResubmissionRequested` / reminders + later `identityVerificationSubmitted` |
 | Ignore HMAC / process before verify | Verify `X-Webhook-Signature` on the **raw** body first |
 | Assume exactly-once delivery | Design for at-least-once + idempotency |
 
@@ -566,7 +694,7 @@ Omit the list entirely if you want the full catalogue (including other verificat
 
 | Document | Contents |
 |----------|----------|
-| [Onboarding (IDV) webhooks](../onboarding/onboarding-webhooks.md) | HMAC, catalogue, deep dives for IR / due diligence context fields |
+| [Onboarding (IDV) webhooks](../onboarding/onboarding-webhooks.md) | HMAC, catalogue, deep dives for IR / resubmission / due diligence context fields |
 | [Client loan / onboarding workflow](../client-loan-application-workflow.md) | Broader loan journey including webhooks |
 | [Identity API Overview](./identity-api.md) | Features and REST concepts |
 | [Identity Endpoints](./identity-endpoints.md) | Merchant identity REST reference |
@@ -579,4 +707,5 @@ Omit the list entirely if you want the full catalogue (including other verificat
 | Change | Effect on you |
 |--------|----------------|
 | Initial Review vs due diligence split | You may receive `initialReviewCompleted` and later `dueDiligenceStarted` as **two** events |
+| Identity resubmission webhooks | `identityResubmissionRequested` per request; `identityResubmissionReminderSent` per reminder — client-safe fields only (see onboarding webhooks guide) |
 | Final outcomes unchanged | Still `identityVerificationCleared` / `identityVerificationRejected` |

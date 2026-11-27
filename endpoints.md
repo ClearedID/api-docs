@@ -554,6 +554,7 @@ Configure webhooks to receive real-time notifications about verification and sig
 
 **Onboarding (IDV) — camelCase `eventName` (selected):**
 - `identityVerificationStarted` / `identityVerificationSubmitted`
+- `identityResubmissionRequested` / `identityResubmissionReminderSent`
 - `initialReviewCompleted` / `dueDiligenceStarted`
 - `identityVerificationCleared` / `identityVerificationRejected` / `identityVerificationApproved`
 - `verificationRequestApproved`
